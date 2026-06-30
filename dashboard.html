@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HeyZoya Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="heyZoyaLogo.png">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #06080f;
+      --sidebar-bg: rgba(255,255,255,0.04);
+      --card: rgba(255,255,255,0.04);
+      --card-border: rgba(255,255,255,0.07);
+      --accent1: #f2b9b8;
+      --accent2: #f7d9a1;
+      --muted: #7b8ba5;
+      --muted2: #9aabc2;
+      --success: #4ef58a;
+      --danger: #f87171;
+      --warning: #fbbf24;
+      --text: #dde8f5;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+    /* LAYOUT */
+    .dashboard-layout { display: flex; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+      background: var(--sidebar-bg); backdrop-filter: blur(16px);
+      border-right: 1px solid rgba(255,255,255,0.05);
+      display: flex; flex-direction: column; justify-content: space-between;
+      z-index: 200; transition: transform 0.3s ease;
+    }
+    .sidebar-top { padding: 28px 20px 0; }
+    .sidebar-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 36px; }
+    .sidebar-brand img { width: 36px; height: 36px; border-radius: 9px; }
+    .sidebar-brand span { font-family: 'Playfair Display', serif; font-size: 18px; color: #fff; }
+    nav { display: flex; flex-direction: column; gap: 4px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px; border-radius: 10px; cursor: pointer;
+      color: var(--muted2); font-size: 14px; font-weight: 500;
+      transition: all 0.2s; text-decoration: none; border: none; background: none; width: 100%; text-align: left;
+    }
+    .nav-item .nav-icon { font-size: 17px; width: 22px; text-align: center; flex-shrink: 0; }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    .nav-item.active { background: linear-gradient(90deg, rgba(242,185,184,0.12), rgba(247,217,161,0.08)); color: #fff; border: 1px solid rgba(247,217,161,0.1); }
+    .nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(--accent2)); }
+    .nav-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 12px 0; }
+    .sidebar-bottom { padding: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .user-pill { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent1), var(--accent2)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: #111; flex-shrink: 0; }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 14px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-biz { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .btn-logout { width: 100%; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.15); color: var(--danger); font-size: 13px; font-weight: 600; padding: 9px; border-radius: 9px; cursor: pointer; transition: all 0.2s; }
+    .btn-logout:hover { background: rgba(248,113,113,0.15); }
+
+    /* MAIN */
+    .main-content { margin-left: 240px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.3s; }
+    .topbar { position: sticky; top: 0; z-index: 100; background: rgba(6,8,15,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 0 28px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .menu-toggle { display: none; background: none; border: 1px solid rgba(255,255,255,0.08); color: var(--muted2); font-size: 18px; padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+    .page-title { font-size: 16px; font-weight: 700; color: #fff; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .topbar-logo { height: 32px; }
+    .topbar-greeting { font-size: 14px; color: var(--muted); }
+    .content { padding: 28px; flex: 1; }
+
+    /* SECTIONS */
+    section { display: none; animation: fadeIn 0.3s ease; }
+    section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .section-header { margin-bottom: 24px; }
+    .section-header h2 { font-family: 'Playfair Display', serif; font-size: 26px; color: #fff; margin-bottom: 4px; }
+    .section-header p { font-size: 14px; color: var(--muted); }
+
+    /* CARDS */
+    .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; padding: 20px; }
+    .card-sm { background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px; }
+
+    /* STAT CARDS */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; padding: 20px; }
+    .stat-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
+    .stat-value { font-size: 32px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 6px; }
+    .stat-change { font-size: 12px; display: flex; align-items: center; gap: 4px; }
+    .stat-change.up { color: var(--success); }
+    .stat-change.down { color: var(--danger); }
+
+    /* CHART */
+    .chart-card { margin-bottom: 24px; }
+    .chart-title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 16px; }
+
+    /* ── APPOINTMENTS SECTION ── */
+    .appt-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .appt-search { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 9px 14px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; width: 240px; }
+    .appt-search::placeholder { color: rgba(255,255,255,0.3); }
+    .appt-search:focus { border-color: rgba(247,217,161,0.3); }
+    .btn-add { display: flex; align-items: center; gap: 7px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); color: #111; font-weight: 700; font-size: 13px; padding: 9px 18px; border-radius: 10px; border: 0; cursor: pointer; transition: all 0.2s; }
+    .btn-add:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(247,217,161,0.18); }
+    .appt-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+    .filter-chip { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); color: var(--muted2); font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 999px; cursor: pointer; transition: all 0.2s; }
+    .filter-chip.active, .filter-chip:hover { background: rgba(247,217,161,0.1); border-color: rgba(247,217,161,0.2); color: var(--accent2); }
+    .appt-table { width: 100%; border-collapse: collapse; }
+    .appt-table th { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 14px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .appt-table td { padding: 14px 14px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+    .appt-table tr:last-child td { border-bottom: none; }
+    .appt-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .appt-name { font-weight: 600; color: #fff; }
+    .appt-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+    .badge-confirmed { background: rgba(78,245,138,0.1); color: var(--success); border: 1px solid rgba(78,245,138,0.2); }
+    .badge-pending { background: rgba(251,191,36,0.1); color: var(--warning); border: 1px solid rgba(251,191,36,0.2); }
+    .badge-cancelled { background: rgba(248,113,113,0.1); color: var(--danger); border: 1px solid rgba(248,113,113,0.2); }
+    .appt-actions { display: flex; gap: 6px; }
+    .btn-icon { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); color: var(--muted2); font-size: 12px; padding: 5px 10px; border-radius: 7px; cursor: pointer; transition: all 0.2s; }
+    .btn-icon:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .empty-state { text-align: center; padding: 48px 0; color: var(--muted); }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 999; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #0d1120; border: 1px solid rgba(255,255,255,0.09); border-radius: 18px; padding: 28px; width: 480px; max-width: 95vw; box-shadow: 0 30px 80px rgba(0,0,0,0.8); animation: fadeIn 0.2s ease; }
+    .modal h3 { font-family: 'Playfair Display', serif; font-size: 20px; color: #fff; margin-bottom: 20px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-field { display: flex; flex-direction: column; gap: 6px; }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-field label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-input { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 14px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .form-input::placeholder { color: rgba(255,255,255,0.28); }
+    .form-input:focus { border-color: rgba(247,217,161,0.35); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .btn-cancel { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--muted2); font-size: 14px; font-weight: 600; padding: 9px 18px; border-radius: 9px; cursor: pointer; transition: all 0.2s; }
+    .btn-cancel:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .btn-save { background: linear-gradient(135deg, var(--accent1), var(--accent2)); color: #111; font-size: 14px; font-weight: 700; padding: 9px 22px; border-radius: 9px; border: 0; cursor: pointer; transition: all 0.2s; }
+    .btn-save:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(247,217,161,0.18); }
+
+    /* ── ACCOUNT SECTION ── */
+    .account-grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+    .profile-card { text-align: center; padding: 28px 20px; }
+    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--accent1), var(--accent2)); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 28px; color: #111; margin: 0 auto 16px; box-shadow: 0 8px 30px rgba(247,217,161,0.15); }
+    .profile-name { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .profile-email { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+    .profile-badge { display: inline-block; background: linear-gradient(90deg, rgba(242,185,184,0.15), rgba(247,217,161,0.1)); border: 1px solid rgba(247,217,161,0.2); color: var(--accent2); font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 999px; }
+    .account-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0; }
+    .acct-tab { background: none; border: none; color: var(--muted); font-size: 14px; font-weight: 500; padding: 10px 16px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; margin-bottom: -1px; }
+    .acct-tab:hover { color: var(--muted2); }
+    .acct-tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+    .acct-panel { display: none; }
+    .acct-panel.active { display: block; animation: fadeIn 0.2s ease; }
+    .form-section { margin-bottom: 24px; }
+    .form-section-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .acct-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .acct-field { display: flex; flex-direction: column; gap: 6px; }
+    .acct-field.full { grid-column: 1 / -1; }
+    .acct-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .acct-input { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 10px 14px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .acct-input::placeholder { color: rgba(255,255,255,0.28); }
+    .acct-input:focus { border-color: rgba(247,217,161,0.35); box-shadow: 0 0 0 3px rgba(247,217,161,0.06); }
+    .acct-input:read-only { opacity: 0.6; cursor: default; }
+    .acct-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-save-acct { background: linear-gradient(135deg, var(--accent1), var(--accent2)); color: #111; font-weight: 700; font-size: 14px; padding: 10px 24px; border-radius: 10px; border: 0; cursor: pointer; transition: all 0.2s; }
+    .btn-save-acct:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(247,217,161,0.18); }
+    .btn-ghost-acct { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); color: var(--muted2); font-size: 14px; font-weight: 600; padding: 10px 18px; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+    .btn-ghost-acct:hover { color: #fff; background: rgba(255,255,255,0.07); }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-info h4 { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 2px; }
+    .toggle-info p { font-size: 13px; color: var(--muted); }
+    .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: rgba(255,255,255,0.1); border-radius: 999px; cursor: pointer; transition: 0.25s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.25s; }
+    .toggle input:checked + .toggle-slider { background: linear-gradient(90deg, var(--accent1), var(--accent2)); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+    .danger-zone { border: 1px solid rgba(248,113,113,0.15); border-radius: 12px; padding: 18px; margin-top: 8px; }
+    .danger-title { font-size: 14px; font-weight: 700; color: var(--danger); margin-bottom: 6px; }
+    .danger-desc { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+    .btn-danger { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); color: var(--danger); font-size: 13px; font-weight: 700; padding: 9px 18px; border-radius: 9px; cursor: pointer; transition: all 0.2s; }
+    .btn-danger:hover { background: rgba(248,113,113,0.2); }
+    .usage-bar-wrap { margin-bottom: 4px; }
+    .usage-bar-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    .usage-bar { height: 6px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; }
+    .usage-fill { height: 100%; background: linear-gradient(90deg, var(--accent1), var(--accent2)); border-radius: 999px; transition: width 0.6s ease; }
+    .plan-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(90deg, rgba(242,185,184,0.1), rgba(247,217,161,0.06)); border: 1px solid rgba(247,217,161,0.15); border-radius: 999px; padding: 6px 16px; font-size: 13px; font-weight: 600; color: var(--accent2); margin-bottom: 16px; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #0d1120; border: 1px solid rgba(78,245,138,0.2); border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; gap: 10px; z-index: 9999; font-size: 14px; color: var(--success); box-shadow: 0 12px 40px rgba(0,0,0,0.6); transform: translateY(20px); opacity: 0; transition: all 0.3s; pointer-events: none; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* MOBILE */
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; }
+      .menu-toggle { display: block; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .account-grid { grid-template-columns: 1fr; }
+      .acct-form-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .stats-row { grid-template-columns: 1fr; }
+      .content { padding: 16px; }
+      .appt-table thead { display: none; }
+      .appt-table tr { display: flex; flex-direction: column; border-bottom: 1px solid rgba(255,255,255,0.06); padding: 12px 0; }
+      .appt-table td { padding: 4px 0; border: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-brand">
+        <img src="heyzoya.png" alt="HeyZoya">
+        <span>HeyZoya</span>
+      </div>
+      <nav>
+        <button class="nav-item active" data-section="overview">
+          <span class="nav-icon">📊</span> Overview
+        </button>
+        <button class="nav-item" data-section="leads">
+          <span class="nav-icon">🎯</span> Leads
+        </button>
+        <button class="nav-item" data-section="appointments">
+          <span class="nav-icon">📅</span> Appointments
+        </button>
+        <div class="nav-divider"></div>
+        <button class="nav-item" data-section="account">
+          <span class="nav-icon">👤</span> Account
+        </button>
+      </nav>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="user-pill">
+        <div class="user-avatar" id="userAvatarInitial">U</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebarUserName">User</div>
+          <div class="user-biz" id="sidebarBizName">My Business</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">⎋ Logout</button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <span class="page-title" id="pageTitle">Overview</span>
+      </div>
+      <div class="topbar-right">
+        <img src="heyZoyaLogo.png" class="topbar-logo" alt="HeyZoya">
+        <span class="topbar-greeting" id="topGreeting">Welcome back 👋</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ─── OVERVIEW ─── -->
+      <section id="overview" class="active">
+        <div class="section-header">
+          <h2>Overview</h2>
+          <p>Your business performance at a glance</p>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-label">Total Leads</div>
+            <div class="stat-value" id="statLeads">0</div>
+            <div class="stat-change up">↑ 12% vs last week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Appointments</div>
+            <div class="stat-value" id="statAppts">0</div>
+            <div class="stat-change up">↑ 8% vs last week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active Leads</div>
+            <div class="stat-value" id="statActive">0</div>
+            <div class="stat-change down">↓ 3% inactive</div>
+          </div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-title">Leads & Appointments — Last 7 Days</div>
+          <canvas id="leadsChart" style="max-height:280px"></canvas>
+        </div>
+      </section>
+
+      <!-- ─── LEADS ─── -->
+      <section id="leads">
+        <div class="section-header">
+          <h2>Leads</h2>
+          <p>Manage and track your incoming leads</p>
+        </div>
+        <div class="card">
+          <p style="color:var(--muted);font-size:14px;padding:24px 0;text-align:center">Lead management is coming soon. Your leads from HeyZoya calls will appear here.</p>
+        </div>
+      </section>
+
+      <!-- ─── APPOINTMENTS ─── -->
+      <section id="appointments">
+        <div class="section-header">
+          <h2>Appointments</h2>
+          <p>Schedule and manage client appointments</p>
+        </div>
+        <div class="appt-controls">
+          <input type="text" class="appt-search" id="apptSearch" placeholder="Search appointments…">
+          <button class="btn-add" onclick="openApptModal()">+ New Appointment</button>
+        </div>
+        <div class="appt-filters">
+          <button class="filter-chip active" data-filter="all">All</button>
+          <button class="filter-chip" data-filter="confirmed">Confirmed</button>
+          <button class="filter-chip" data-filter="pending">Pending</button>
+          <button class="filter-chip" data-filter="cancelled">Cancelled</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="appt-table" id="apptTable">
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Date & Time</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="apptBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ─── ACCOUNT ─── -->
+      <section id="account">
+        <div class="section-header">
+          <h2>Account Settings</h2>
+          <p>Manage your profile, preferences, and billing</p>
+        </div>
+        <div class="account-grid">
+          <!-- Profile sidebar -->
+          <div class="card profile-card">
+            <div class="profile-avatar" id="acctAvatarInitial">U</div>
+            <div class="profile-name" id="acctName">User</div>
+            <div class="profile-email" id="acctEmail">user@example.com</div>
+            <div class="profile-badge">✦ Growth Plan</div>
+            <div style="margin-top:20px;text-align:left">
+              <div class="usage-bar-wrap">
+                <div class="usage-bar-label"><span>Minutes Used</span><span id="minsUsed">47 / 100</span></div>
+                <div class="usage-bar"><div class="usage-fill" style="width:47%"></div></div>
+              </div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px">53 minutes remaining this month</div>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div>
+            <div class="account-tabs">
+              <button class="acct-tab active" data-tab="profile">Profile</button>
+              <button class="acct-tab" data-tab="notifications">Notifications</button>
+              <button class="acct-tab" data-tab="billing">Billing</button>
+              <button class="acct-tab" data-tab="security">Security</button>
+            </div>
+
+            <!-- Profile Tab -->
+            <div class="acct-panel active" id="panel-profile">
+              <div class="card">
+                <div class="form-section">
+                  <div class="form-section-title">Personal Information</div>
+                  <div class="acct-form-grid">
+                    <div class="acct-field">
+                      <label class="acct-label">First Name</label>
+                      <input class="acct-input" id="acctFirstName" type="text" placeholder="First name">
+                    </div>
+                    <div class="acct-field">
+                      <label class="acct-label">Last Name</label>
+                      <input class="acct-input" id="acctLastName" type="text" placeholder="Last name">
+                    </div>
+                    <div class="acct-field full">
+                      <label class="acct-label">Email Address</label>
+                      <input class="acct-input" id="acctEmailInput" type="email" readonly>
+                    </div>
+                    <div class="acct-field">
+                      <label class="acct-label">Phone</label>
+                      <input class="acct-input" id="acctPhone" type="tel" placeholder="+1 (555) 000-0000">
+                    </div>
+                    <div class="acct-field">
+                      <label class="acct-label">Industry</label>
+                      <select class="acct-input" id="acctIndustry">
+                        <option value="">Select industry</option>
+                        <option>Real Estate</option><option>HVAC</option><option>Legal</option>
+                        <option>Healthcare</option><option>Automotive</option><option>Other</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-section">
+                  <div class="form-section-title">Business Information</div>
+                  <div class="acct-form-grid">
+                    <div class="acct-field full">
+                      <label class="acct-label">Business Name</label>
+                      <input class="acct-input" id="acctBizName" type="text" placeholder="Your business name">
+                    </div>
+                    <div class="acct-field full">
+                      <label class="acct-label">Website</label>
+                      <input class="acct-input" id="acctWebsite" type="url" placeholder="https://yourbusiness.com">
+                    </div>
+                    <div class="acct-field full">
+                      <label class="acct-label">Business Description</label>
+                      <textarea class="acct-input" id="acctBizDesc" rows="3" placeholder="Brief description of your business…" style="resize:vertical"></textarea>
+                    </div>
+                  </div>
+                </div>
+                <div class="acct-actions">
+                  <button class="btn-save-acct" onclick="saveProfile()">Save Changes</button>
+                  <button class="btn-ghost-acct" onclick="loadProfile()">Discard</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notifications Tab -->
+            <div class="acct-panel" id="panel-notifications">
+              <div class="card">
+                <div class="form-section-title" style="margin-bottom:16px">Notification Preferences</div>
+                <div class="toggle-row">
+                  <div class="toggle-info"><h4>New Lead Alert</h4><p>Get notified when HeyZoya captures a new lead</p></div>
+                  <label class="toggle"><input type="checkbox" checked id="notif-lead"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info"><h4>Appointment Booked</h4><p>Notify me when a new appointment is scheduled</p></div>
+                  <label class="toggle"><input type="checkbox" checked id="notif-appt"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info"><h4>Daily Summary</h4><p>Receive a daily digest of calls, leads, and bookings</p></div>
+                  <label class="toggle"><input type="checkbox" id="notif-daily"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info"><h4>Missed Call Alert</h4><p>Alert when Zoya couldn't handle a call</p></div>
+                  <label class="toggle"><input type="checkbox" checked id="notif-missed"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info"><h4>Weekly Report</h4><p>Weekly performance report via email</p></div>
+                  <label class="toggle"><input type="checkbox" id="notif-weekly"><span class="toggle-slider"></span></label>
+                </div>
+                <div class="acct-actions" style="margin-top:20px">
+                  <button class="btn-save-acct" onclick="showToast('Notification preferences saved!')">Save Preferences</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Billing Tab -->
+            <div class="acct-panel" id="panel-billing">
+              <div class="card">
+                <div class="plan-badge">⚡ Growth Plan — Active</div>
+                <div class="form-section-title">Current Plan</div>
+                <div class="acct-form-grid" style="margin-bottom:20px">
+                  <div class="card-sm">
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Plan</div>
+                    <div style="font-size:15px;font-weight:700;color:#fff">Growth — Pay As You Go</div>
+                  </div>
+                  <div class="card-sm">
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Rate</div>
+                    <div style="font-size:15px;font-weight:700;color:var(--accent2)">$1 / minute</div>
+                  </div>
+                  <div class="card-sm">
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Minutes This Month</div>
+                    <div style="font-size:15px;font-weight:700;color:#fff">47 min</div>
+                  </div>
+                  <div class="card-sm">
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Est. Bill</div>
+                    <div style="font-size:15px;font-weight:700;color:var(--accent2)">$47.00</div>
+                  </div>
+                </div>
+                <div class="form-section-title">Payment Method</div>
+                <div style="display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:14px">
+                  <span style="font-size:24px">💳</span>
+                  <div>
+                    <div style="font-size:14px;font-weight:600;color:#fff">Visa ending in 4242</div>
+                    <div style="font-size:12px;color:var(--muted)">Expires 12/26</div>
+                  </div>
+                </div>
+                <div class="acct-actions">
+                  <button class="btn-save-acct" onclick="showToast('Billing portal opening…')">Manage Billing</button>
+                  <button class="btn-ghost-acct" onclick="showToast('Invoice downloaded!')">Download Invoice</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Security Tab -->
+            <div class="acct-panel" id="panel-security">
+              <div class="card">
+                <div class="form-section">
+                  <div class="form-section-title">Change Password</div>
+                  <div class="acct-form-grid">
+                    <div class="acct-field full">
+                      <label class="acct-label">Current Password</label>
+                      <input class="acct-input" type="password" placeholder="Current password">
+                    </div>
+                    <div class="acct-field">
+                      <label class="acct-label">New Password</label>
+                      <input class="acct-input" type="password" placeholder="New password">
+                    </div>
+                    <div class="acct-field">
+                      <label class="acct-label">Confirm Password</label>
+                      <input class="acct-input" type="password" placeholder="Confirm new password">
+                    </div>
+                  </div>
+                  <div class="acct-actions" style="margin-top:16px">
+                    <button class="btn-save-acct" onclick="showToast('Password updated successfully!')">Update Password</button>
+                  </div>
+                </div>
+                <div class="form-section">
+                  <div class="form-section-title">Two-Factor Authentication</div>
+                  <div class="toggle-row">
+                    <div class="toggle-info"><h4>Enable 2FA</h4><p>Add an extra layer of security to your account</p></div>
+                    <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+                  </div>
+                </div>
+                <div>
+                  <div class="form-section-title">Danger Zone</div>
+                  <div class="danger-zone">
+                    <div class="danger-title">Delete Account</div>
+                    <div class="danger-desc">Permanently delete your HeyZoya account and all associated data. This action cannot be undone.</div>
+                    <button class="btn-danger">Delete Account</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- end tabs right -->
+        </div><!-- end account-grid -->
+      </section><!-- end account -->
+
+    </div><!-- end .content -->
+  </div><!-- end .main-content -->
+</div>
+
+<!-- APPOINTMENT MODAL -->
+<div class="modal-overlay" id="apptModal">
+  <div class="modal">
+    <h3 id="modalTitle">New Appointment</h3>
+    <div class="form-grid">
+      <div class="form-field">
+        <label class="acct-label">Client Name</label>
+        <input class="form-input" id="m-client" type="text" placeholder="Full name">
+      </div>
+      <div class="form-field">
+        <label class="acct-label">Phone</label>
+        <input class="form-input" id="m-phone" type="tel" placeholder="+1 555 000 0000">
+      </div>
+      <div class="form-field">
+        <label class="acct-label">Date</label>
+        <input class="form-input" id="m-date" type="date">
+      </div>
+      <div class="form-field">
+        <label class="acct-label">Time</label>
+        <input class="form-input" id="m-time" type="time">
+      </div>
+      <div class="form-field">
+        <label class="acct-label">Appointment Type</label>
+        <select class="form-input" id="m-type">
+          <option value="Consultation">Consultation</option>
+          <option value="Follow-up">Follow-up</option>
+          <option value="Demo">Demo</option>
+          <option value="Service">Service</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="acct-label">Status</label>
+        <select class="form-input" id="m-status">
+          <option value="confirmed">Confirmed</option>
+          <option value="pending">Pending</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="form-field full">
+        <label class="acct-label">Notes</label>
+        <input class="form-input" id="m-notes" type="text" placeholder="Any notes (optional)">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeApptModal()">Cancel</button>
+      <button class="btn-save" onclick="saveAppointment()">Save Appointment</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✓ <span id="toastMsg">Saved!</span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="dashboard-script.js" defer></script>
+<script>
+  const { createClient } = supabase;
+  const _supabase = createClient(
+    'https://tgiczukuciviivhwjbqu.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnaWN6dWt1Y2l2aWl2aHdqYnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MjEwODksImV4cCI6MjA5ODM5NzA4OX0.UCv6mFXST0jkt_180Bz0mskJc1anX_-5spcrXkVUGgE'
+  );
+
+  // ── AUTH CHECK ──
+  let currentUser = null;
+  (async () => {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) { window.location.replace('login.html'); return; }
+    currentUser = session.user;
+
+    // ── POPULATE USER ──
+    function getInitials(name) {
+      return (name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+    }
+    const meta        = currentUser.user_metadata || {};
+    const displayName = meta.full_name || meta.name || currentUser.email.split('@')[0];
+    const bizName     = meta.business_name || 'My Business';
+    const loggedInEmail = currentUser.email;
+
+    document.getElementById('sidebarUserName').textContent = displayName;
+    document.getElementById('sidebarBizName').textContent = bizName;
+    document.getElementById('userAvatarInitial').textContent = getInitials(displayName);
+    document.getElementById('topGreeting').textContent = `Welcome, ${displayName.split(' ')[0]} 👋`;
+    document.getElementById('acctAvatarInitial').textContent = getInitials(displayName);
+    document.getElementById('acctName').textContent = displayName;
+    document.getElementById('acctEmail').textContent = loggedInEmail;
+    document.getElementById('acctEmailInput').value = loggedInEmail;
+    document.getElementById('acctBizName').value = bizName;
+    const nameParts = displayName.split(' ');
+    document.getElementById('acctFirstName').value = nameParts[0] || '';
+    document.getElementById('acctLastName').value = nameParts.slice(1).join(' ') || '';
+  })();
+
+  // stats
+  const appts = JSON.parse(localStorage.getItem('hzAppts') || '[]');
+  document.getElementById('statLeads').textContent = '24';
+  document.getElementById('statAppts').textContent = appts.length || '7';
+  document.getElementById('statActive').textContent = '18';
+
+  // ── NAVIGATION ──
+  const sections = ['overview', 'leads', 'appointments', 'account'];
+  const pageTitles = { overview: 'Overview', leads: 'Leads', appointments: 'Appointments', account: 'Account Settings' };
+
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sec = btn.dataset.section;
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      sections.forEach(s => {
+        const el = document.getElementById(s);
+        if (el) el.classList.toggle('active', s === sec);
+      });
+      document.getElementById('pageTitle').textContent = pageTitles[sec] || sec;
+      if (window.innerWidth < 900) closeSidebar();
+    });
+  });
+
+  // ── SIDEBAR ──
+  function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+  function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
+
+  // ── LOGOUT ──
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await _supabase.auth.signOut();
+    window.location.href = 'login.html';
+  });
+
+  // ── APPOINTMENTS ──
+  let editingApptId = null;
+  let allAppts = JSON.parse(localStorage.getItem('hzAppts') || '[]');
+
+  // Seed sample data if empty
+  if (allAppts.length === 0) {
+    allAppts = [
+      { id: Date.now()+1, client: 'Sarah Johnson', phone: '+1 555 012 3456', date: '2025-11-25', time: '10:00', type: 'Consultation', status: 'confirmed', notes: 'Interested in HVAC service' },
+      { id: Date.now()+2, client: 'Michael Torres', phone: '+1 555 987 6543', date: '2025-11-26', time: '14:30', type: 'Demo', status: 'pending', notes: 'Referred by John' },
+      { id: Date.now()+3, client: 'Aisha Patel', phone: '+1 555 246 8101', date: '2025-11-28', time: '09:00', type: 'Follow-up', status: 'confirmed', notes: '' },
+      { id: Date.now()+4, client: 'James Nguyen', phone: '+1 555 135 7924', date: '2025-11-20', time: '11:00', type: 'Consultation', status: 'cancelled', notes: 'Rescheduling needed' },
+    ];
+    localStorage.setItem('hzAppts', JSON.stringify(allAppts));
+  }
+
+  let apptFilter = 'all';
+  let apptSearch = '';
+
+  function renderAppts() {
+    const tbody = document.getElementById('apptBody');
+    let list = allAppts;
+    if (apptFilter !== 'all') list = list.filter(a => a.status === apptFilter);
+    if (apptSearch) list = list.filter(a => a.client.toLowerCase().includes(apptSearch.toLowerCase()) || a.type.toLowerCase().includes(apptSearch.toLowerCase()));
+
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📅</div><div>No appointments found</div></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = list.map(a => `
+      <tr>
+        <td><div class="appt-name">${a.client}</div><div class="appt-detail">${a.phone || '—'}</div></td>
+        <td><div>${formatDate(a.date)}</div><div class="appt-detail">${a.time}</div></td>
+        <td>${a.type}</td>
+        <td><span class="badge badge-${a.status}">${a.status}</span></td>
+        <td><div class="appt-actions">
+          <button class="btn-icon" onclick="editAppt(${a.id})">✏️ Edit</button>
+          <button class="btn-icon" onclick="deleteAppt(${a.id})" style="color:var(--danger)">🗑</button>
+        </div></td>
+      </tr>
+    `).join('');
+  }
+
+  function formatDate(d) {
+    if (!d) return '—';
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  document.getElementById('apptSearch').addEventListener('input', e => { apptSearch = e.target.value; renderAppts(); });
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      apptFilter = chip.dataset.filter;
+      renderAppts();
+    });
+  });
+
+  function openApptModal(id = null) {
+    editingApptId = id;
+    document.getElementById('modalTitle').textContent = id ? 'Edit Appointment' : 'New Appointment';
+    if (id) {
+      const a = allAppts.find(x => x.id === id);
+      if (a) {
+        document.getElementById('m-client').value = a.client;
+        document.getElementById('m-phone').value = a.phone || '';
+        document.getElementById('m-date').value = a.date;
+        document.getElementById('m-time').value = a.time;
+        document.getElementById('m-type').value = a.type;
+        document.getElementById('m-status').value = a.status;
+        document.getElementById('m-notes').value = a.notes || '';
+      }
+    } else {
+      document.getElementById('m-client').value = '';
+      document.getElementById('m-phone').value = '';
+      document.getElementById('m-date').value = '';
+      document.getElementById('m-time').value = '';
+      document.getElementById('m-type').value = 'Consultation';
+      document.getElementById('m-status').value = 'confirmed';
+      document.getElementById('m-notes').value = '';
+    }
+    document.getElementById('apptModal').classList.add('open');
+  }
+
+  function closeApptModal() { document.getElementById('apptModal').classList.remove('open'); }
+
+  function saveAppointment() {
+    const entry = {
+      id: editingApptId || Date.now(),
+      client: document.getElementById('m-client').value.trim(),
+      phone: document.getElementById('m-phone').value.trim(),
+      date: document.getElementById('m-date').value,
+      time: document.getElementById('m-time').value,
+      type: document.getElementById('m-type').value,
+      status: document.getElementById('m-status').value,
+      notes: document.getElementById('m-notes').value.trim()
+    };
+    if (!entry.client || !entry.date) { alert('Client name and date are required.'); return; }
+    if (editingApptId) {
+      const idx = allAppts.findIndex(a => a.id === editingApptId);
+      if (idx > -1) allAppts[idx] = entry;
+    } else {
+      allAppts.unshift(entry);
+    }
+    localStorage.setItem('hzAppts', JSON.stringify(allAppts));
+    document.getElementById('statAppts').textContent = allAppts.length;
+    closeApptModal();
+    renderAppts();
+    showToast(editingApptId ? 'Appointment updated!' : 'Appointment added!');
+  }
+
+  function editAppt(id) { openApptModal(id); }
+
+  function deleteAppt(id) {
+    if (!confirm('Delete this appointment?')) return;
+    allAppts = allAppts.filter(a => a.id !== id);
+    localStorage.setItem('hzAppts', JSON.stringify(allAppts));
+    renderAppts();
+    showToast('Appointment deleted.');
+  }
+
+  renderAppts();
+
+  // ── ACCOUNT TABS ──
+  document.querySelectorAll('.acct-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.acct-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.acct-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ── PROFILE SAVE ──
+  function loadProfile() {
+    document.getElementById('acctFirstName').value = nameParts[0] || '';
+    document.getElementById('acctLastName').value = nameParts.slice(1).join(' ') || '';
+    document.getElementById('acctBizName').value = bizName;
+    showToast('Changes discarded.');
+  }
+
+  function saveProfile() {
+    const fn = document.getElementById('acctFirstName').value.trim();
+    const ln = document.getElementById('acctLastName').value.trim();
+    const biz = document.getElementById('acctBizName').value.trim();
+    const fullName = [fn, ln].filter(Boolean).join(' ');
+    const updatedData = { ...userData, name: fullName, businessName: biz };
+    localStorage.setItem(loggedInEmail, JSON.stringify(updatedData));
+    document.getElementById('sidebarUserName').textContent = fullName;
+    document.getElementById('sidebarBizName').textContent = biz;
+    document.getElementById('acctName').textContent = fullName;
+    document.getElementById('acctAvatarInitial').textContent = getInitials(fullName);
+    document.getElementById('userAvatarInitial').textContent = getInitials(fullName);
+    showToast('Profile saved successfully!');
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ── MODAL CLOSE ON OVERLAY ──
+  document.getElementById('apptModal').addEventListener('click', function(e) {
+    if (e.target === this) closeApptModal();
+  });
+</script>
+</body>
+</html>

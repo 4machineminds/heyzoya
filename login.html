@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login — HeyZoya</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="heyZoyaLogo.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #05060a;
+    --bg2:     #0a0c14;
+    --panel:   #0d0f1a;
+    --border:  rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text:    #dde8f8;
+    --muted:   #6d7f99;
+    --accent1: #f2b9b8;
+    --accent2: #f7d9a1;
+  }
+
+  body {
+    font-family: 'Poppins', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel {
+    width: 400px;
+    min-width: 400px;
+    min-height: 100vh;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 48px 44px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    margin-bottom: 64px;
+  }
+  .brand img {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px rgba(242,185,184,.4));
+  }
+  .brand span { font-size: 17px; font-weight: 700; color: #fff; }
+
+  .form-area { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+  .form-area h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .form-area .subtitle {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 40px;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
+  .field label { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .5px; }
+  .field-wrap { position: relative; }
+  .field input {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .field input:focus {
+    border-color: rgba(242,185,184,.5);
+    box-shadow: 0 0 0 3px rgba(242,185,184,.08);
+  }
+  .field input::placeholder { color: var(--muted); }
+  .eye-btn {
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); display: flex; align-items: center;
+    transition: color .2s;
+  }
+  .eye-btn:hover { color: var(--text); }
+
+  .sign-btn {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: #111;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .25s;
+    margin-top: 6px;
+  }
+  .sign-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(247,217,161,.22); }
+  .sign-btn:active { transform: translateY(0); }
+
+  #loginMsg {
+    font-size: 13px;
+    margin-top: 14px;
+    text-align: center;
+    min-height: 20px;
+  }
+
+  .no-account {
+    margin-top: 28px;
+    font-size: 12.5px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--muted); font-size: 13px; text-decoration: none;
+    margin-top: auto; padding-top: 40px;
+    transition: color .2s;
+  }
+  .back-link:hover { color: #fff; }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    flex: 1;
+    background: var(--bg2);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* subtle dot grid */
+  .right-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* glow blobs */
+  .glow-a {
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(242,185,184,.06) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .glow-b {
+    position: absolute;
+    bottom: -80px; left: -80px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(247,217,161,.05) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .brand-card {
+    position: relative;
+    z-index: 1;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border2);
+    border-radius: 24px;
+    padding: 40px 44px;
+    max-width: 420px;
+    width: 90%;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 32px 80px rgba(0,0,0,.5);
+  }
+
+  .card-brand {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 32px;
+  }
+  .card-brand img {
+    width: 34px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 6px rgba(242,185,184,.3));
+  }
+  .card-brand span { font-size: 15px; font-weight: 700; color: var(--muted); }
+
+  .card-quote {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.35;
+    margin-bottom: 16px;
+  }
+  .card-quote em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .card-desc {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+
+  .card-stats {
+    display: flex;
+    gap: 36px;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+  }
+  .stat-val {
+    font-size: 26px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-lbl {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    body { flex-direction: column; }
+    .left-panel { width: 100%; min-width: unset; min-height: unset; padding: 36px 28px; }
+    .right-panel { min-height: 360px; }
+    .brand { margin-bottom: 40px; }
+    .back-link { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LEFT: FORM PANEL ── -->
+<div class="left-panel">
+  <a href="index.html" class="brand">
+    <img src="heyZoyaLogo.png" alt="HeyZoya">
+    <span>HeyZoya</span>
+  </a>
+
+  <div class="form-area">
+    <h1>Welcome back</h1>
+    <p class="subtitle">Sign in to access your HeyZoya dashboard.<br>Contact your admin if you need an account.</p>
+
+    <form id="loginForm" autocomplete="off">
+      <div class="field">
+        <label>Email address</label>
+        <div class="field-wrap">
+          <input type="email" id="email" placeholder="you@company.com" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="field-wrap">
+          <input type="password" id="password" placeholder="••••••••••••" required>
+          <button type="button" class="eye-btn" id="eyeBtn" aria-label="Show password">
+            <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="sign-btn">Sign in</button>
+      <div id="loginMsg"></div>
+    </form>
+
+    <p class="no-account">No account? <a href="index.html#contact" style="color:var(--accent1);text-decoration:none;font-weight:600;">Request access here</a> and our team will set you up.</p>
+  </div>
+
+  <a href="index.html" class="back-link">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back to HeyZoya
+  </a>
+</div>
+
+<!-- ── RIGHT: BRAND PANEL ── -->
+<div class="right-panel">
+  <div class="glow-a"></div>
+  <div class="glow-b"></div>
+
+  <div class="brand-card">
+    <div class="card-brand">
+      <img src="heyZoyaLogo.png" alt="HeyZoya">
+      <span>HeyZoya</span>
+    </div>
+
+    <div class="card-quote">"Never miss a call.<br><em>Never lose a client.</em>"</div>
+
+    <p class="card-desc">Your AI voice agent dashboard — manage your Zoya agent, review call logs, track bookings, and keep your business running around the clock.</p>
+
+    <div class="card-stats">
+      <div>
+        <div class="stat-val">24/7</div>
+        <div class="stat-lbl">Always On</div>
+      </div>
+      <div>
+        <div class="stat-val">$1</div>
+        <div class="stat-lbl">Per Minute</div>
+      </div>
+      <div>
+        <div class="stat-val">0</div>
+        <div class="stat-lbl">Missed Calls</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const { createClient } = supabase;
+  const _supabase = createClient(
+    'https://tgiczukuciviivhwjbqu.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnaWN6dWt1Y2l2aWl2aHdqYnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MjEwODksImV4cCI6MjA5ODM5NzA4OX0.UCv6mFXST0jkt_180Bz0mskJc1anX_-5spcrXkVUGgE'
+  );
+
+  // Redirect if already logged in
+  _supabase.auth.getSession().then(({ data: { session } }) => {
+    if (session) window.location.replace('dashboard.html');
+  });
+
+  // Password visibility toggle
+  const eyeBtn   = document.getElementById('eyeBtn');
+  const pwdInput = document.getElementById('password');
+  eyeBtn.addEventListener('click', () => {
+    const show = pwdInput.type === 'password';
+    pwdInput.type = show ? 'text' : 'password';
+    eyeBtn.innerHTML = show
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+  });
+
+  // Sign in
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const msg      = document.getElementById('loginMsg');
+    const btn      = e.target.querySelector('button[type="submit"]');
+
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+    msg.textContent = '';
+
+    const { error } = await _supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      msg.style.color = '#f87171';
+      msg.textContent = '❌ ' + (error.message === 'Invalid login credentials'
+        ? 'Invalid email or password.'
+        : error.message);
+      btn.disabled = false;
+      btn.textContent = 'Sign in';
+    } else {
+      msg.style.color = '#4ef58a';
+      msg.textContent = '✅ Signed in! Redirecting…';
+      setTimeout(() => window.location.href = 'dashboard.html', 800);
+    }
+  });
+</script>
+
+</body>
+</html>

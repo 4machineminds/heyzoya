@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="heyZoyaLogo.png">
+  <meta name="theme-color" content="#05060a">
+  <title>Privacy Policy — HeyZoya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: auto; }
+    :root {
+      --bg: #05060a; --bg2: #070b12;
+      --surface: rgba(255,255,255,0.03); --surface-hover: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.07); --border-hover: rgba(255,255,255,0.14);
+      --text: #dde8f8; --muted: #6d7f99; --accent1: #f2b9b8; --accent2: #f7d9a1;
+    }
+    body { font-family: 'Poppins', system-ui, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; height: 66px; background: rgba(5,6,10,0.88); backdrop-filter: blur(24px); border-bottom: 1px solid var(--border); }
+    .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 48px; height: 100%; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-brand img { width: 38px; height: 38px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(242,185,184,.4)); }
+    .nav-brand span { font-size: 17px; font-weight: 700; color: #fff; }
+    .nav-links { display: flex; align-items: center; gap: 2px; justify-content: center; }
+    .nav-link { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; padding: 8px 14px; border-radius: 8px; transition: color .2s; }
+    .nav-link:hover { color: #fff; }
+    .nav-btns { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+    .btn-nav-ghost { color: var(--text); font-size: 14px; font-weight: 600; padding: 8px 18px; border-radius: 10px; border: 1.5px solid var(--border-hover); background: var(--surface); cursor: pointer; font-family: inherit; transition: all .2s; text-decoration: none; display: inline-block; }
+    .btn-nav-primary { background: linear-gradient(135deg, var(--accent1), var(--accent2)); color: #111; font-size: 14px; font-weight: 700; padding: 9px 20px; border-radius: 10px; border: 0; cursor: pointer; font-family: inherit; transition: all .2s; text-decoration: none; display: inline-block; }
+
+    /* Page layout */
+    .page-hero { padding: 140px 48px 60px; text-align: center; }
+    .s-label { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: var(--accent2); margin-bottom: 14px; }
+    .page-hero h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; color: #fff; margin-bottom: 14px; }
+    .page-hero .updated { font-size: 13px; color: var(--muted); }
+
+    /* Doc content */
+    .doc-section { padding: 0 48px 100px; }
+    .doc-inner { max-width: 760px; margin: 0 auto; }
+    .doc-inner h2 { font-size: 18px; font-weight: 700; color: #fff; margin: 40px 0 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .doc-inner h2:first-child { margin-top: 0; }
+    .doc-inner p { font-size: 14px; color: var(--muted); line-height: 1.85; margin-bottom: 14px; }
+    .doc-inner ul { padding-left: 20px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .doc-inner li { font-size: 14px; color: var(--muted); line-height: 1.75; }
+    .doc-inner a { color: var(--accent1); text-decoration: none; }
+    .doc-inner a:hover { text-decoration: underline; }
+    .doc-inner strong { color: var(--text); font-weight: 600; }
+
+    /* Footer */
+    footer { background: var(--bg2); border-top: 1px solid var(--border); }
+    .footer-main { padding: 60px 48px 40px; max-width: 1100px; margin: 0 auto; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
+    .footer-brand-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-bottom: 14px; }
+    .footer-brand-logo img { width: 32px; border-radius: 8px; }
+    .footer-brand-logo span { font-size: 16px; font-weight: 700; color: #fff; }
+    .footer-brand p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+    .footer-col-title { font-size: 12px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+    .footer-col a { display: block; color: var(--muted); text-decoration: none; font-size: 14px; margin-bottom: 10px; transition: color .2s; }
+    .footer-col a:hover { color: #fff; }
+    .footer-bottom { border-top: 1px solid var(--border); padding: 22px 48px; max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .foot-copy { font-size: 12px; color: var(--muted); }
+    .foot-links a { font-size: 12px; color: var(--muted); text-decoration: none; margin-left: 20px; transition: color .2s; }
+    .foot-links a:hover { color: #fff; }
+    @media (max-width: 768px) { .page-hero, .doc-section { padding-left: 20px; padding-right: 20px; } .footer-main { padding: 40px 20px; } .footer-grid { grid-template-columns: 1fr 1fr; } .nav-inner { padding: 0 20px; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand">
+      <img src="heyZoyaLogo.png" alt="HeyZoya">
+      <span>HeyZoya</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html#features" class="nav-link">Features</a>
+      <a href="index.html#pricing" class="nav-link">Pricing</a>
+      <a href="index.html#faq" class="nav-link">FAQ</a>
+    </div>
+    <div class="nav-btns">
+      <a href="login.html" class="btn-nav-ghost">Login</a>
+      <a href="index.html#contact" class="btn-nav-primary">Get Started</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <span class="s-label">LEGAL</span>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated: June 29, 2025</p>
+</div>
+
+<section class="doc-section">
+  <div class="doc-inner">
+
+    <h2>Introduction</h2>
+    <p>HeyZoya ("we", "us", "our") is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard data when you use our AI voice agent platform and website.</p>
+
+    <h2>Information We Collect</h2>
+    <ul>
+      <li>Contact information (name, email, phone number) when you fill out forms</li>
+      <li>Business information (company name, website, industry) provided during onboarding</li>
+      <li>Call data including transcripts, recordings, and caller information processed by our AI</li>
+      <li>Usage data such as dashboard interactions, feature usage, and session logs</li>
+      <li>Payment information processed securely through our payment providers (we never store card numbers)</li>
+    </ul>
+
+    <h2>How We Use Your Information</h2>
+    <ul>
+      <li>To provide, operate, and improve the HeyZoya platform</li>
+      <li>To configure and run your AI voice agent</li>
+      <li>To send service updates, billing notices, and support communications</li>
+      <li>To analyse usage patterns and improve our AI models</li>
+      <li>To comply with legal obligations</li>
+    </ul>
+
+    <h2>Data Sharing</h2>
+    <p>We do not sell your personal data. We share data only with: (a) service providers who help us operate the platform (e.g. cloud infrastructure, payment processors); (b) integration partners you explicitly connect (e.g. Google Calendar, HubSpot); (c) law enforcement when required by law.</p>
+
+    <h2>Call Recordings &amp; Transcripts</h2>
+    <p>Call recordings and transcripts are stored securely and retained for 90 days by default. You may request deletion at any time. Callers are informed that calls may be recorded via a disclosure at the start of each call.</p>
+
+    <h2>Your Rights</h2>
+    <ul>
+      <li>Access the personal data we hold about you</li>
+      <li>Request correction or deletion of your data</li>
+      <li>Object to or restrict processing</li>
+      <li>Data portability — export your data in a machine-readable format</li>
+      <li>Withdraw consent at any time</li>
+    </ul>
+    <p>To exercise any right, email: <a href="mailto:privacy@heyzoya.com">privacy@heyzoya.com</a></p>
+
+    <h2>Cookies</h2>
+    <p>We use essential cookies for authentication and session management, and optional analytics cookies to understand how our platform is used. You can disable non-essential cookies in your browser settings.</p>
+
+    <h2>Data Security</h2>
+    <p>We use industry-standard encryption (TLS 1.3) for data in transit and AES-256 for data at rest. Access to personal data is restricted to authorised personnel only.</p>
+
+    <h2>Changes to This Policy</h2>
+    <p>We may update this policy periodically. We'll notify you by email for material changes. Continued use of HeyZoya after changes constitutes acceptance.</p>
+
+    <h2>Contact</h2>
+    <p>For privacy enquiries: <a href="mailto:privacy@heyzoya.com">privacy@heyzoya.com</a></p>
+
+  </div>
+</section>
+
+<footer>
+  <div class="footer-main">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="footer-brand-logo"><img src="heyZoyaLogo.png" alt="HeyZoya"><span>HeyZoya</span></a>
+        <p>Helping businesses automate appointments and customer interactions.</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Industries</div>
+        <a href="salons-spas.html">Salons &amp; Spas</a>
+        <a href="home-services.html">Home Services</a>
+        <a href="legal-practices.html">Legal Practices</a>
+        <a href="automotive-repair.html">Automotive Repair</a>
+        <a href="small-business.html">Small Business</a>
+        <a href="real-estate.html">Real Estate</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Resources</div>
+        <a href="index.html#features">Features</a>
+        <a href="index.html#pricing">Pricing</a>
+        <a href="index.html#faq">FAQ</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Legal</div>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="legal.html">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="foot-copy">© 2025 HeyZoya — A product of Machine Minds. All rights reserved.</span>
+    <span class="foot-links"><a href="privacy.html">Privacy</a><a href="legal.html">Terms</a></span>
+  </div>
+</footer>
+<script>
+  const lenis = new Lenis({ duration: 1.4, easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smooth: true, smoothTouch: false });
+  function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+  requestAnimationFrame(raf);
+</script>
+</body>
+</html>
