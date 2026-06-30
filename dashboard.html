@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>HeyZoya Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="heyZoyaLogo.png">
+  <link rel="icon" type="image/png" href="assets/images/heyZoyaLogo.png">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -219,7 +219,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-top">
       <div class="sidebar-brand">
-        <img src="heyzoya.png" alt="HeyZoya">
+        <img src="assets/images/heyzoya.png" alt="HeyZoya">
         <span>HeyZoya</span>
       </div>
       <nav>
@@ -258,7 +258,7 @@
         <span class="page-title" id="pageTitle">Overview</span>
       </div>
       <div class="topbar-right">
-        <img src="heyZoyaLogo.png" class="topbar-logo" alt="HeyZoya">
+        <img src="assets/images/heyZoyaLogo.png" class="topbar-logo" alt="HeyZoya">
         <span class="topbar-greeting" id="topGreeting">Welcome back 👋</span>
       </div>
     </div>
@@ -596,7 +596,7 @@
 <div class="toast" id="toast">✓ <span id="toastMsg">Saved!</span></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="dashboard-script.js" defer></script>
+<script src="js/dashboard-script.js" defer></script>
 <script>
   const { createClient } = supabase;
   const _supabase = createClient(
