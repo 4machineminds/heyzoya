@@ -1105,6 +1105,109 @@
     50%       { opacity: 1; }
   }
 
+  /* ── CHAT WIDGET ── */
+  #chatWidget {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+  #chatToggle {
+    width: 58px; height: 58px; border-radius: 50%;
+    background: linear-gradient(135deg, #f2b9b8, #f7d9a1);
+    border: none; cursor: pointer;
+    box-shadow: 0 8px 32px rgba(242,185,184,.5);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    transition: transform .25s, box-shadow .25s;
+  }
+  #chatToggle:hover { transform: scale(1.08); box-shadow: 0 12px 40px rgba(242,185,184,.65); }
+  #chatToggle .ct-icon, #chatToggle .ct-close {
+    position: absolute; transition: opacity .2s, transform .2s;
+    font-size: 22px; color: #111; font-weight: 700; line-height: 1;
+  }
+  #chatToggle .ct-close { opacity: 0; transform: rotate(-90deg); }
+  #chatWidget.open #chatToggle .ct-icon { opacity: 0; transform: rotate(90deg); }
+  #chatWidget.open #chatToggle .ct-close { opacity: 1; transform: rotate(0deg); }
+  #chatWindow {
+    position: absolute; bottom: 70px; right: 0; width: 340px;
+    background: #0d0f1a; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; box-shadow: 0 24px 80px rgba(0,0,0,.85);
+    display: flex; flex-direction: column; overflow: hidden; max-height: 500px;
+    opacity: 0; transform: translateY(14px) scale(.97); pointer-events: none;
+    transition: opacity .25s, transform .25s;
+  }
+  #chatWidget.open #chatWindow { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+  #chatWinHeader {
+    display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+    background: #10101a; border-bottom: 1px solid rgba(255,255,255,0.07); flex-shrink: 0;
+  }
+  .cw-avt {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #f2b9b8, #f7d9a1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; color: #111; flex-shrink: 0;
+  }
+  .cw-hd-info { flex: 1; }
+  .cw-hd-name { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.1; }
+  .cw-hd-status { font-size: 11px; color: #22c55e; margin-top: 1px; }
+  #chatWinClose {
+    background: none; border: none; cursor: pointer;
+    color: rgba(255,255,255,.35); font-size: 16px; padding: 2px 4px; transition: color .2s;
+  }
+  #chatWinClose:hover { color: #fff; }
+  #chatMessages {
+    flex: 1; overflow-y: auto; padding: 14px 12px;
+    display: flex; flex-direction: column; gap: 10px; background: #05060a;
+  }
+  #chatMessages::-webkit-scrollbar { width: 3px; }
+  #chatMessages::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+  .cw-msg { display: flex; align-items: flex-end; gap: 7px; max-width: 88%; }
+  .cw-msg.bot { align-self: flex-start; }
+  .cw-msg.usr { align-self: flex-end; flex-direction: row-reverse; }
+  .cw-avt-sm {
+    width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #f2b9b8, #f7d9a1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 800; color: #111;
+  }
+  .cw-bubble { padding: 9px 13px; border-radius: 14px; font-size: 13px; line-height: 1.5; }
+  .cw-msg.bot .cw-bubble { background: rgba(255,255,255,.06); color: #dde8f8; border-bottom-left-radius: 4px; }
+  .cw-msg.usr .cw-bubble { background: linear-gradient(135deg, #f2b9b8, #f7d9a1); color: #111; font-weight: 600; border-bottom-right-radius: 4px; }
+  .cw-typing .cw-bubble { background: rgba(255,255,255,.06); padding: 13px 16px; }
+  .cw-dots span {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,.45); margin: 0 2px;
+    animation: cwDot 1.2s ease-in-out infinite;
+  }
+  .cw-dots span:nth-child(2) { animation-delay: .2s; }
+  .cw-dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes cwDot {
+    0%,100% { transform: translateY(0); opacity: .4; }
+    50%      { transform: translateY(-4px); opacity: 1; }
+  }
+  #chatInputRow {
+    display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+    background: #10101a; border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0;
+  }
+  #chatField {
+    flex: 1; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 20px; padding: 9px 14px; font-size: 13px; color: #fff;
+    font-family: 'Poppins', system-ui, sans-serif; outline: none; transition: border-color .2s;
+  }
+  #chatField:focus { border-color: rgba(242,185,184,.45); }
+  #chatField::placeholder { color: rgba(255,255,255,.3); }
+  #chatSendBtn {
+    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #f2b9b8, #f7d9a1);
+    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: transform .2s, opacity .2s;
+  }
+  #chatSendBtn:hover { transform: scale(1.08); }
+  #chatSendBtn:disabled { opacity: .5; cursor: default; transform: none; }
+  #chatSendBtn svg { width: 14px; height: 14px; }
+  @media (max-width: 480px) {
+    #chatWindow { width: calc(100vw - 40px); right: -8px; }
+  }
+
   </style>
 </head>
 <body>
@@ -2008,5 +2111,116 @@
   });
 </script>
 
+<!-- ── CHAT WIDGET ── -->
+<div id="chatWidget">
+  <button id="chatToggle" aria-label="Open chat">
+    <span class="ct-icon">💬</span>
+    <span class="ct-close">✕</span>
+  </button>
+  <div id="chatWindow" role="dialog" aria-label="Chat with Zoya">
+    <div id="chatWinHeader">
+      <div class="cw-avt">Z</div>
+      <div class="cw-hd-info">
+        <div class="cw-hd-name">Zoya AI</div>
+        <div class="cw-hd-status">● Always online</div>
+      </div>
+      <button id="chatWinClose" aria-label="Close chat">✕</button>
+    </div>
+    <div id="chatMessages">
+      <div class="cw-msg bot">
+        <div class="cw-avt-sm">Z</div>
+        <div class="cw-bubble">Hi there! 👋 I'm Zoya, your AI assistant. How can I help you today?</div>
+      </div>
+    </div>
+    <div id="chatInputRow">
+      <input type="text" id="chatField" placeholder="Type a message…" autocomplete="off">
+      <button id="chatSendBtn" aria-label="Send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2" fill="#111" stroke="none"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var WEBHOOK   = 'https://n8n.srv1763320.hstgr.cloud/webhook/heyZoya-chat';
+  var sessionId = sessionStorage.getItem('hz_sid') || (function () {
+    var id = 'sid_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+    sessionStorage.setItem('hz_sid', id);
+    return id;
+  })();
+
+  var widget  = document.getElementById('chatWidget');
+  var toggle  = document.getElementById('chatToggle');
+  var closeBtn = document.getElementById('chatWinClose');
+  var msgs    = document.getElementById('chatMessages');
+  var field   = document.getElementById('chatField');
+  var sendBtn = document.getElementById('chatSendBtn');
+
+  toggle.addEventListener('click', function () {
+    widget.classList.toggle('open');
+    if (widget.classList.contains('open')) field.focus();
+  });
+  closeBtn.addEventListener('click', function () { widget.classList.remove('open'); });
+
+  function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function scrollBottom() { msgs.scrollTop = msgs.scrollHeight; }
+
+  function addMsg(text, role) {
+    var d = document.createElement('div');
+    d.className = 'cw-msg ' + role;
+    d.innerHTML = role === 'bot'
+      ? '<div class="cw-avt-sm">Z</div><div class="cw-bubble">' + esc(text) + '</div>'
+      : '<div class="cw-bubble">' + esc(text) + '</div>';
+    msgs.appendChild(d);
+    scrollBottom();
+  }
+
+  function showTyping() {
+    var d = document.createElement('div');
+    d.className = 'cw-msg bot cw-typing';
+    d.innerHTML = '<div class="cw-avt-sm">Z</div><div class="cw-bubble"><div class="cw-dots"><span></span><span></span><span></span></div></div>';
+    msgs.appendChild(d);
+    scrollBottom();
+    return d;
+  }
+
+  async function send() {
+    var text = field.value.trim();
+    if (!text) return;
+    field.value = '';
+    sendBtn.disabled = true;
+    addMsg(text, 'usr');
+    var typing = showTyping();
+    try {
+      var res = await fetch(WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: sessionId,
+          message:   text,
+          timestamp: new Date().toISOString()
+        })
+      });
+      var data = await res.json();
+      var reply = data.output || data.message || data.response || data.text || data.reply
+        || (Array.isArray(data) && data[0] && (data[0].output || data[0].message || data[0].text))
+        || JSON.stringify(data);
+      typing.remove();
+      addMsg(String(reply), 'bot');
+    } catch (e) {
+      typing.remove();
+      addMsg('Sorry, something went wrong. Please try again.', 'bot');
+    }
+    sendBtn.disabled = false;
+    field.focus();
+  }
+
+  sendBtn.addEventListener('click', send);
+  field.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+})();
+</script>
 </body>
 </html>
