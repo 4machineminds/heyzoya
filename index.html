@@ -1798,8 +1798,7 @@
   let voicePlaying = false;
   let scenePlaying = false;
 
-  const playVoiceBtn    = document.getElementById('playVoice');
-  const playScenarioBtn = document.getElementById('playScenario');
+  const playVoiceBtn = document.getElementById('playVoice');
 
   playVoiceBtn.addEventListener('click', () => {
     if (!voicePlaying) {
@@ -1815,25 +1814,9 @@
     }
   });
 
-  playScenarioBtn.addEventListener('click', () => {
-    if (!scenePlaying) {
-      audio.currentTime = 0;
-      audio.play();
-      scenePlaying = true;
-      playScenarioBtn.textContent = '⏹ Stop';
-    } else {
-      audio.pause();
-      audio.currentTime = 0;
-      scenePlaying = false;
-      playScenarioBtn.textContent = '▶ Play';
-    }
-  });
-
   audio.addEventListener('ended', () => {
     voicePlaying = false;
-    scenePlaying = false;
-    playVoiceBtn.textContent    = '▶ Play Demo Voice';
-    playScenarioBtn.textContent = '▶ Play';
+    playVoiceBtn.textContent = '▶ Play Demo Voice';
   });
 
   // Scroll to contact form
@@ -1887,21 +1870,26 @@
     }
   });
 
-  // ── PHONE MOCKUP ANIMATION ──
-  (function () {
+  // ── PHONE MOCKUP ANIMATION ── RAF-based timer, immune to setTimeout interference
+  window.addEventListener('load', function () {
     var states    = ['state-ring', 'state-connected', 'state-chat', 'state-booked'];
-    var durations = [3000, 3200, 5800, 3500];
+    var durations = [2800, 2500, 5000, 3000];
     var cur = 0;
+    var elapsed = 0;
+    var lastTs  = null;
 
     function show(idx) {
       document.querySelectorAll('.p-state').forEach(function(s){ s.classList.remove('active'); });
       var el = document.querySelector('.' + states[idx]);
+      if (!el) return;
       el.classList.add('active');
 
       if (states[idx] === 'state-chat') {
         var msgs = el.querySelectorAll('.c-msg');
         msgs.forEach(function(m){ m.classList.remove('show'); });
-        msgs.forEach(function(m, i){ setTimeout(function(){ m.classList.add('show'); }, 350 + i * 900); });
+        msgs.forEach(function(m, i){
+          setTimeout(function(){ m.classList.add('show'); }, 300 + i * 800);
+        });
       }
 
       if (states[idx] === 'state-booked') {
@@ -1913,15 +1901,22 @@
       }
     }
 
-    function next() {
-      cur = (cur + 1) % states.length;
-      show(cur);
-      setTimeout(next, durations[cur]);
+    function tick(ts) {
+      if (lastTs !== null) {
+        elapsed += ts - lastTs;
+        if (elapsed >= durations[cur]) {
+          elapsed = 0;
+          cur = (cur + 1) % states.length;
+          show(cur);
+        }
+      }
+      lastTs = ts;
+      requestAnimationFrame(tick);
     }
 
     show(0);
-    setTimeout(next, durations[0]);
-  })();
+    requestAnimationFrame(tick);
+  });
 </script>
 
 <script>
