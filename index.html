@@ -2144,9 +2144,9 @@
 <script>
 (function () {
   var WEBHOOK   = 'https://n8n.srv1763320.hstgr.cloud/webhook/heyZoya-chat';
-  var sessionId = sessionStorage.getItem('hz_sid') || (function () {
+  var sessionId = localStorage.getItem('hz_sid') || (function () {
     var id = 'sid_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
-    sessionStorage.setItem('hz_sid', id);
+    localStorage.setItem('hz_sid', id);
     return id;
   })();
 
