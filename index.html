@@ -811,34 +811,123 @@
       .footer-bottom { padding: 18px 28px; }
       .hero { padding-top: 130px; padding-bottom: 80px; }
       .hero-inner { grid-template-columns: 1fr; gap: 40px; }
-      .phone-wrap { max-width: 420px; }
+      .phone-wrap { max-width: 420px; margin: 0 auto; }
       .features-grid { grid-template-columns: repeat(2, 1fr); }
       .steps-grid { grid-template-columns: repeat(2, 1fr); }
       .steps-grid::before { display: none; }
       .contact-inner { grid-template-columns: 1fr; gap: 40px; }
       .pricing-grid { grid-template-columns: repeat(2, 1fr); }
     }
+
     @media (max-width: 640px) {
-      section { padding: 64px 18px; }
-      nav { padding: 0 18px; }
+      /* layout */
+      section { padding: 56px 18px; }
+
+      /* nav */
+      .nav-inner { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+      .nav-links { display: none; }
+      .nav-btns { gap: 6px; }
+      .btn-nav-ghost { font-size: 13px; padding: 7px 14px; }
+      .btn-nav-primary { font-size: 13px; padding: 7px 14px; }
+
+      /* hero */
+      .hero { padding-top: 100px; padding-bottom: 56px; }
+      .hero-inner { grid-template-columns: 1fr; gap: 36px; text-align: center; }
+      .hero h1 { font-size: clamp(1.9rem, 8vw, 2.4rem); }
+      .hero-badge { justify-content: center; }
+      .hero-desc { font-size: 15px; max-width: 100%; }
+      .cta-row { justify-content: center; flex-wrap: wrap; gap: 10px; }
+      .btn-primary { font-size: 14px; padding: 13px 22px; }
+      .btn-ghost   { font-size: 14px; padding: 12px 20px; }
+      .hero-stats  { justify-content: center; gap: 24px; flex-wrap: wrap; }
+
+      /* phone mockup */
+      .phone-wrap  { max-width: 220px; margin: 0 auto; }
+      .phone-frame { width: 220px; }
+      .phone-screen { height: 450px; }
+
+      /* footer */
       .footer-main { padding: 40px 18px 28px; }
       .footer-grid { grid-template-columns: 1fr; gap: 28px; }
-      .footer-bottom { padding: 16px 18px; }
-      .cta-btns { flex-direction: column; align-items: stretch; max-width: 280px; margin: 0 auto 24px; }
-      .hero { padding-top: 110px; }
-      .hero h1 { font-size: 2rem; }
+      .footer-bottom { padding: 16px 18px; flex-direction: column; gap: 8px; text-align: center; }
+
+      /* sections */
       .features-grid { grid-template-columns: 1fr; }
-      .steps-grid { grid-template-columns: 1fr 1fr; }
-      .form-grid { grid-template-columns: 1fr; }
-      .hero-stats { gap: 20px; }
-      .nav-link { display: none; }
+      .steps-grid    { grid-template-columns: 1fr 1fr; }
+      .pricing-grid  { grid-template-columns: 1fr; }
+      .form-grid     { grid-template-columns: 1fr; }
+      .contact-info  { padding: 24px 20px; }
+      .form-card     { padding: 24px 20px; }
+
+      /* social proof */
       .sb-grid { grid-template-columns: 1fr 1fr; height: auto; }
       .sb-photo-tall { grid-row: auto; }
+
+      /* industries */
       .industries-orbit { position: static; height: auto; display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-top: 40px; }
       .orbit-center { display: none; }
-      .orbit-card { position: static !important; transform: none !important; }
+      .orbit-card   { position: static !important; transform: none !important; }
+
+      /* meet */
       .meet-cards { grid-template-columns: 1fr 1fr; }
       .industries-inner { grid-template-columns: 1fr; }
+
+      /* s-title sizing */
+      .s-title { font-size: 1.65rem; }
+    }
+
+    @media (max-width: 480px) {
+      section { padding: 48px 16px; }
+
+      /* nav — hide Login on tiny screens */
+      .nav-inner { padding: 0 16px; }
+      .btn-nav-ghost { display: none; }
+
+      /* hero */
+      .hero { padding-top: 88px; padding-bottom: 44px; }
+      .hero h1 { font-size: 1.75rem; line-height: 1.12; }
+      .hero-desc { font-size: 14px; }
+      .hero-stats { gap: 18px; }
+      .stat-val  { font-size: 20px; }
+      .cta-row   { flex-direction: column; align-items: stretch; }
+      .btn-primary, .btn-ghost { width: 100%; justify-content: center; text-align: center; }
+
+      /* phone mockup */
+      .phone-wrap   { max-width: 200px; }
+      .phone-frame  { width: 200px; border-radius: 36px; }
+      .phone-screen { height: 410px; }
+      .p-statusbar  { padding: 6px 18px 0; }
+
+      /* pricing */
+      .price-card { padding: 24px 18px 20px; }
+      .price-tag  { font-size: 28px; }
+
+      /* steps */
+      .steps-grid { grid-template-columns: 1fr; }
+      .step-card  { padding: 20px 12px; }
+
+      /* social proof */
+      .sb-grid    { grid-template-columns: 1fr; }
+      .meet-cards { grid-template-columns: 1fr; }
+
+      /* faq */
+      .faq-q  { padding: 16px 18px; font-size: 13.5px; }
+      .faq-a  { padding: 0 18px 16px; font-size: 13px; }
+
+      /* chat widget */
+      #chatWidget  { bottom: 16px; right: 16px; }
+      #chatToggle  { width: 52px; height: 52px; }
+      #chatWindow  { width: calc(100vw - 32px); right: -8px; bottom: 62px; max-height: 440px; }
+    }
+
+    @media (max-width: 375px) {
+      .hero h1 { font-size: 1.6rem; }
+      .phone-frame  { width: 185px; border-radius: 32px; }
+      .phone-screen { height: 380px; }
+      .ch-name  { font-size: 11.5px; }
+      .msg-bbl  { font-size: 10.5px; }
+      .nav-brand span { font-size: 16px; }
+      .btn-nav-primary { font-size: 12px; padding: 6px 12px; }
     }
   </style>
 
@@ -1060,9 +1149,19 @@
       .oc-1,.oc-2,.oc-3,.oc-4,.oc-5,.oc-6 { top: auto; left: auto; right: auto; bottom: auto; }
     }
     @media (max-width: 640px) {
+      .sb-grid { grid-template-columns: 1fr 1fr; }
+      .meet-cards { grid-template-columns: 1fr 1fr; }
+      .industries-orbit { grid-template-columns: 1fr 1fr; }
+      .stats-section { padding: 56px 0; }
+      .stats-headline h2 { font-size: 1.9rem; }
+      .sb-notif { padding: 10px 12px; }
+      .sb-notif-msg { font-size: 12px; }
+    }
+    @media (max-width: 480px) {
       .sb-grid { grid-template-columns: 1fr; }
       .meet-cards { grid-template-columns: 1fr; }
-      .industries-orbit { grid-template-columns: 1fr 1fr; }
+      .stats-headline h2 { font-size: 1.65rem; }
+      .stat-card-val { font-size: 2.2rem; }
     }
   /* ── PRELOADER ── */
   #preloader {
