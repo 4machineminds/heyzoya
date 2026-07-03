@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin — HeyZoya</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="assets/images/heyZoyaLogo.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:       #06080f;
+    --panel:    #0d0f1a;
+    --card:     rgba(255,255,255,0.04);
+    --border:   rgba(255,255,255,0.07);
+    --border2:  rgba(255,255,255,0.12);
+    --accent1:  #f2b9b8;
+    --accent2:  #f7d9a1;
+    --text:     #dde8f5;
+    --muted:    #7b8ba5;
+    --muted2:   #9aabc2;
+    --success:  #4ef58a;
+    --danger:   #f87171;
+    --sidebar:  240px;
+  }
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+  /* ── GATE SCREEN ── */
+  #gateScreen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+    padding: 24px;
+  }
+  .gate-card {
+    background: var(--panel);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 44px 40px;
+    width: 100%; max-width: 420px;
+    box-shadow: 0 32px 80px rgba(0,0,0,.5);
+  }
+  .gate-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 36px; }
+  .gate-brand img { width: 36px; filter: drop-shadow(0 0 8px rgba(242,185,184,.4)); }
+  .gate-brand span { font-size: 17px; font-weight: 700; color: #fff; }
+  .gate-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(247,217,161,0.1); border: 1px solid rgba(247,217,161,0.2);
+    border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 600;
+    color: var(--accent2); letter-spacing: .5px; text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .gate-card h1 { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .gate-card p { font-size: 13.5px; color: var(--muted); line-height: 1.6; margin-bottom: 32px; }
+  .g-field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+  .g-field label { font-size: 11.5px; font-weight: 600; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
+  .g-field input {
+    width: 100%; padding: 12px 14px;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border2);
+    border-radius: 10px; color: #fff; font-size: 14px; font-family: inherit;
+    outline: none; transition: border-color .2s, box-shadow .2s;
+  }
+  .g-field input:focus { border-color: rgba(242,185,184,.5); box-shadow: 0 0 0 3px rgba(242,185,184,.08); }
+  .g-field input::placeholder { color: var(--muted); }
+  .g-hint { font-size: 11.5px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .gate-btn {
+    width: 100%; padding: 13px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: #111; font-size: 15px; font-weight: 700; font-family: inherit;
+    border: none; border-radius: 10px; cursor: pointer;
+    transition: all .25s; margin-top: 8px;
+  }
+  .gate-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(247,217,161,.22); }
+  #gateErr { font-size: 13px; color: var(--danger); margin-top: 12px; text-align: center; min-height: 18px; }
+
+  /* ── ADMIN LAYOUT ── */
+  #adminApp { display: none; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; width: var(--sidebar);
+    background: rgba(255,255,255,0.03); backdrop-filter: blur(16px);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    z-index: 100;
+  }
+  .sb-top { padding: 28px 18px 0; flex: 1; overflow-y: auto; }
+  .sb-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; text-decoration: none; }
+  .sb-brand img { width: 34px; filter: drop-shadow(0 0 6px rgba(242,185,184,.35)); }
+  .sb-brand span { font-size: 16px; font-weight: 700; color: #fff; }
+  .sb-badge {
+    display: inline-block; background: rgba(247,217,161,0.12); border: 1px solid rgba(247,217,161,0.2);
+    border-radius: 20px; padding: 3px 10px; font-size: 10px; font-weight: 700;
+    color: var(--accent2); letter-spacing: .8px; text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .sb-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); padding: 0 4px; margin-bottom: 6px; margin-top: 16px; }
+  .sb-nav { display: flex; flex-direction: column; gap: 2px; }
+  .sb-item {
+    display: flex; align-items: center; gap: 11px; padding: 10px 12px;
+    border-radius: 10px; cursor: pointer; color: var(--muted2);
+    font-size: 13.5px; font-weight: 500; text-decoration: none;
+    transition: all .2s; border: none; background: none; width: 100%; text-align: left;
+  }
+  .sb-item .ic { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+  .sb-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+  .sb-item.active { background: linear-gradient(90deg, rgba(242,185,184,.12), rgba(247,217,161,.08)); color: #fff; border: 1px solid rgba(247,217,161,.1); }
+  .sb-divider { height: 1px; background: var(--border); margin: 12px 0; }
+  .sb-bottom { padding: 16px 18px; border-top: 1px solid var(--border); }
+  .sb-logout {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border-radius: 10px; cursor: pointer; color: var(--muted2);
+    font-size: 13.5px; font-weight: 500; transition: all .2s;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .sb-logout:hover { background: rgba(248,113,113,.08); color: var(--danger); }
+
+  /* MAIN */
+  .main { margin-left: var(--sidebar); min-height: 100vh; }
+
+  /* TOPBAR */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(6,8,15,.85); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    height: 64px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 32px;
+  }
+  .topbar-title { font-size: 18px; font-weight: 700; color: #fff; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .topbar-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(78,245,138,.08); border: 1px solid rgba(78,245,138,.15);
+    border-radius: 20px; padding: 5px 12px;
+    font-size: 12px; font-weight: 600; color: var(--success);
+  }
+  .topbar-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 6px var(--success); }
+
+  /* PAGE */
+  .page { padding: 32px; }
+
+  /* STATS ROW */
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px 22px;
+  }
+  .stat-card .lbl { font-size: 11px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .stat-card .val { font-size: 32px; font-weight: 800; color: #fff; line-height: 1; }
+  .stat-card .sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+  /* SECTION CARD */
+  .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+  }
+  .section-head h2 { font-size: 15px; font-weight: 700; color: #fff; }
+  .section-head p { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+  /* BUTTON */
+  .btn-create {
+    display: flex; align-items: center; gap: 7px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: #111; font-size: 13px; font-weight: 700; font-family: inherit;
+    border: none; border-radius: 9px; padding: 9px 16px; cursor: pointer;
+    transition: all .2s; white-space: nowrap;
+  }
+  .btn-create:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(247,217,161,.2); }
+
+  /* SEARCH */
+  .search-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 24px; border-bottom: 1px solid var(--border);
+  }
+  .search-bar input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-size: 14px; font-family: inherit;
+  }
+  .search-bar input::placeholder { color: var(--muted); }
+  .search-icon { color: var(--muted); flex-shrink: 0; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 10px 20px; text-align: left;
+    font-size: 11px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase;
+    color: var(--muted); border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.015);
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  td { padding: 14px 20px; font-size: 13.5px; vertical-align: middle; }
+
+  .avatar-cell { display: flex; align-items: center; gap: 12px; }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #111;
+  }
+  .email-text { color: #fff; font-weight: 500; }
+  .date-text { color: var(--muted); font-size: 12.5px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 600;
+  }
+  .badge.active { background: rgba(78,245,138,.1); color: var(--success); border: 1px solid rgba(78,245,138,.15); }
+  .badge.invited { background: rgba(247,217,161,.1); color: var(--accent2); border: 1px solid rgba(247,217,161,.15); }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .action-row { display: flex; gap: 8px; }
+  .btn-icon {
+    width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--border);
+    background: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--muted2); font-size: 14px; transition: all .2s;
+  }
+  .btn-icon:hover { background: rgba(255,255,255,0.05); color: #fff; border-color: var(--border2); }
+  .btn-icon.danger:hover { background: rgba(248,113,113,.1); color: var(--danger); border-color: rgba(248,113,113,.2); }
+
+  .empty-state {
+    text-align: center; padding: 56px 24px; color: var(--muted);
+  }
+  .empty-state .empty-icon { font-size: 36px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  #loadingRow td { text-align: center; padding: 40px; color: var(--muted); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    visibility: hidden; opacity: 0; transition: opacity .22s, visibility 0s linear .22s;
+  }
+  .modal-overlay.open {
+    visibility: visible; opacity: 1; transition: opacity .22s;
+  }
+  .modal {
+    background: var(--panel); border: 1px solid var(--border2); border-radius: 20px;
+    padding: 32px; width: 100%; max-width: 460px;
+    transform: scale(.96) translateY(8px);
+    transition: transform .22s ease;
+  }
+  .modal-overlay.open .modal { transform: scale(1) translateY(0); }
+  .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .modal-head h3 { font-size: 18px; font-weight: 700; color: #fff; }
+  .modal-close {
+    width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
+    background: none; cursor: pointer; color: var(--muted2); font-size: 18px;
+    display: flex; align-items: center; justify-content: center; transition: all .2s;
+  }
+  .modal-close:hover { background: rgba(255,255,255,.05); color: #fff; }
+  .m-field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+  .m-field label { font-size: 11.5px; font-weight: 600; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
+  .m-field input {
+    width: 100%; padding: 12px 14px;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border2);
+    border-radius: 10px; color: #fff; font-size: 14px; font-family: inherit;
+    outline: none; transition: border-color .2s, box-shadow .2s;
+  }
+  .m-field input:focus { border-color: rgba(242,185,184,.5); box-shadow: 0 0 0 3px rgba(242,185,184,.08); }
+  .m-field input::placeholder { color: var(--muted); }
+  .modal-footer { display: flex; gap: 10px; margin-top: 24px; }
+  .btn-cancel {
+    flex: 1; padding: 12px; background: none; border: 1px solid var(--border2);
+    border-radius: 10px; color: var(--muted2); font-size: 14px; font-weight: 600;
+    font-family: inherit; cursor: pointer; transition: all .2s;
+  }
+  .btn-cancel:hover { background: rgba(255,255,255,.04); color: #fff; }
+  .btn-submit {
+    flex: 2; padding: 12px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: #111; font-size: 14px; font-weight: 700; font-family: inherit;
+    border: none; border-radius: 10px; cursor: pointer; transition: all .2s;
+  }
+  .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(247,217,161,.2); }
+  .btn-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+  #modalErr { font-size: 12.5px; color: var(--danger); margin-top: 10px; text-align: center; min-height: 18px; }
+
+  /* DELETE CONFIRM MODAL */
+  .modal.delete-modal { max-width: 380px; }
+  .del-icon { font-size: 40px; text-align: center; margin-bottom: 16px; }
+  .del-title { font-size: 18px; font-weight: 700; color: #fff; text-align: center; margin-bottom: 8px; }
+  .del-sub { font-size: 13.5px; color: var(--muted); text-align: center; line-height: 1.6; margin-bottom: 24px; }
+  .del-email { color: var(--accent1); font-weight: 600; }
+  .btn-delete {
+    flex: 2; padding: 12px; background: rgba(248,113,113,.15);
+    border: 1px solid rgba(248,113,113,.3); color: var(--danger);
+    font-size: 14px; font-weight: 700; font-family: inherit;
+    border-radius: 10px; cursor: pointer; transition: all .2s;
+  }
+  .btn-delete:hover { background: rgba(248,113,113,.25); }
+  .btn-delete:disabled { opacity: .6; cursor: not-allowed; }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: rgba(15,17,28,.95); border: 1px solid var(--border2);
+    border-radius: 12px; padding: 12px 20px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; font-weight: 500; color: #fff;
+    box-shadow: 0 16px 48px rgba(0,0,0,.5);
+    opacity: 0; transition: opacity .25s, transform .25s;
+    pointer-events: none; z-index: 999; white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.success { border-color: rgba(78,245,138,.3); }
+  #toast.error   { border-color: rgba(248,113,113,.3); }
+</style>
+</head>
+<body>
+
+<!-- ── GATE ── -->
+<div id="gateScreen">
+  <div class="gate-card">
+    <div class="gate-brand">
+      <img src="assets/images/heyZoyaLogo.png" alt="HeyZoya">
+      <span>HeyZoya</span>
+    </div>
+    <div class="gate-badge">⚙ Admin Panel</div>
+    <h1>Admin Access</h1>
+    <p>Enter your Supabase Service Role Key to access the admin dashboard. Find it in your Supabase project under <strong style="color:var(--accent1)">Settings → API → service_role</strong>.</p>
+    <div class="g-field">
+      <label>Service Role Key</label>
+      <input type="password" id="srKeyInput" placeholder="eyJhbGci…" autocomplete="off">
+      <span class="g-hint">This stays in your browser session only and is never sent anywhere except Supabase.</span>
+    </div>
+    <button class="gate-btn" id="gateBtn">Unlock Admin Panel</button>
+    <div id="gateErr"></div>
+  </div>
+</div>
+
+<!-- ── ADMIN APP ── -->
+<div id="adminApp">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-top">
+      <a href="index.html" class="sb-brand">
+        <img src="assets/images/heyZoyaLogo.png" alt="HeyZoya">
+        <span>HeyZoya</span>
+      </a>
+      <div class="sb-badge">Admin</div>
+      <div class="sb-nav">
+        <div class="sb-label">Manage</div>
+        <button class="sb-item active" id="navUsers">
+          <span class="ic">👤</span> Users
+        </button>
+        <div class="sb-divider"></div>
+        <div class="sb-label">Site</div>
+        <a href="dashboard.html" class="sb-item">
+          <span class="ic">📊</span> Dashboard
+        </a>
+        <a href="index.html" class="sb-item">
+          <span class="ic">🌐</span> Landing Page
+        </a>
+      </div>
+    </div>
+    <div class="sb-bottom">
+      <button class="sb-logout" id="logoutBtn">
+        <span class="ic">🔒</span> Lock Admin
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">User Management</div>
+      <div class="topbar-right">
+        <div class="topbar-pill">
+          <div class="topbar-dot"></div>
+          Supabase Connected
+        </div>
+      </div>
+    </div>
+
+    <div class="page">
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="lbl">Total Users</div>
+          <div class="val" id="statTotal">—</div>
+          <div class="sub">All registered accounts</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">Confirmed</div>
+          <div class="val" id="statConfirmed">—</div>
+          <div class="sub">Email verified</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">Pending</div>
+          <div class="val" id="statPending">—</div>
+          <div class="sub">Awaiting verification</div>
+        </div>
+      </div>
+
+      <!-- USERS TABLE -->
+      <div class="section-card">
+        <div class="section-head">
+          <div>
+            <h2>All Users</h2>
+            <p>Create and manage HeyZoya accounts</p>
+          </div>
+          <button class="btn-create" id="openCreateBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Create User
+          </button>
+        </div>
+        <div class="search-bar">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Search by email…">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Last Sign In</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr id="loadingRow"><td colspan="5" style="text-align:center;padding:40px;color:var(--muted)">Loading users…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CREATE USER MODAL ── -->
+<div class="modal-overlay" id="createModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Create New User</h3>
+      <button class="modal-close" id="closeCreateModal">✕</button>
+    </div>
+    <div class="m-field">
+      <label>Email Address</label>
+      <input type="email" id="newEmail" placeholder="user@company.com" autocomplete="off">
+    </div>
+    <div class="m-field">
+      <label>Password</label>
+      <input type="password" id="newPassword" placeholder="Min 8 characters" autocomplete="new-password">
+    </div>
+    <div class="m-field">
+      <label>Confirm Password</label>
+      <input type="password" id="newPasswordConfirm" placeholder="Repeat password" autocomplete="new-password">
+    </div>
+    <div id="modalErr"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="cancelCreate">Cancel</button>
+      <button class="btn-submit" id="submitCreate">Create User</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── DELETE MODAL ── -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal delete-modal">
+    <div class="del-icon">🗑️</div>
+    <div class="del-title">Delete User?</div>
+    <div class="del-sub">This will permanently delete <span class="del-email" id="delEmailLabel"></span> and cannot be undone.</div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="cancelDelete">Cancel</button>
+      <button class="btn-delete" id="confirmDelete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://tgiczukuciviivhwjbqu.supabase.co';
+const { createClient } = supabase;
+let sb = null;
+let allUsers = [];
+let deleteTargetId = null;
+
+// ── GATE ──────────────────────────────────────────────────────────
+const savedKey = sessionStorage.getItem('hz_admin_key');
+if (savedKey) unlockAdmin(savedKey);
+
+document.getElementById('gateBtn').addEventListener('click', () => {
+  const key = document.getElementById('srKeyInput').value.trim();
+  if (!key) { showGateErr('Please enter your service role key.'); return; }
+  unlockAdmin(key);
+});
+document.getElementById('srKeyInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('gateBtn').click();
+});
+
+async function unlockAdmin(key) {
+  document.getElementById('gateBtn').textContent = 'Connecting…';
+  document.getElementById('gateBtn').disabled = true;
+  document.getElementById('gateErr').textContent = '';
+
+  try {
+    sb = createClient(SUPABASE_URL, key);
+    const { data, error } = await sb.auth.admin.listUsers({ page: 1, perPage: 1 });
+    if (error) throw error;
+    sessionStorage.setItem('hz_admin_key', key);
+    document.getElementById('gateScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display = 'block';
+    loadUsers();
+  } catch (err) {
+    showGateErr('❌ Invalid key or connection failed. Check your service role key.');
+    document.getElementById('gateBtn').textContent = 'Unlock Admin Panel';
+    document.getElementById('gateBtn').disabled = false;
+    sb = null;
+  }
+}
+
+function showGateErr(msg) {
+  document.getElementById('gateErr').textContent = msg;
+}
+
+// ── LOGOUT ────────────────────────────────────────────────────────
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem('hz_admin_key');
+  location.reload();
+});
+
+// ── LOAD USERS ────────────────────────────────────────────────────
+async function loadUsers() {
+  try {
+    let page = 1, users = [];
+    while (true) {
+      const { data, error } = await sb.auth.admin.listUsers({ page, perPage: 1000 });
+      if (error) throw error;
+      users = users.concat(data.users);
+      if (data.users.length < 1000) break;
+      page++;
+    }
+    allUsers = users;
+    updateStats(users);
+    renderTable(users);
+  } catch (err) {
+    document.getElementById('usersTableBody').innerHTML =
+      `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--danger)">Failed to load users: ${err.message}</td></tr>`;
+  }
+}
+
+function updateStats(users) {
+  const confirmed = users.filter(u => u.email_confirmed_at).length;
+  document.getElementById('statTotal').textContent     = users.length;
+  document.getElementById('statConfirmed').textContent = confirmed;
+  document.getElementById('statPending').textContent   = users.length - confirmed;
+}
+
+function renderTable(users) {
+  const tbody = document.getElementById('usersTableBody');
+  if (!users.length) {
+    tbody.innerHTML = `<tr><td colspan="5">
+      <div class="empty-state">
+        <div class="empty-icon">👤</div>
+        <p>No users yet. Create the first one!</p>
+      </div>
+    </td></tr>`;
+    return;
+  }
+  tbody.innerHTML = users.map(u => {
+    const initials = (u.email || '?').charAt(0).toUpperCase();
+    const confirmed = u.email_confirmed_at;
+    const created = fmtDate(u.created_at);
+    const lastSeen = u.last_sign_in_at ? fmtDate(u.last_sign_in_at) : '—';
+    return `<tr>
+      <td>
+        <div class="avatar-cell">
+          <div class="avatar">${initials}</div>
+          <span class="email-text">${esc(u.email)}</span>
+        </div>
+      </td>
+      <td>
+        <span class="badge ${confirmed ? 'active' : 'invited'}">
+          <span class="badge-dot"></span>
+          ${confirmed ? 'Confirmed' : 'Pending'}
+        </span>
+      </td>
+      <td><span class="date-text">${created}</span></td>
+      <td><span class="date-text">${lastSeen}</span></td>
+      <td>
+        <div class="action-row">
+          <button class="btn-icon danger" title="Delete user" onclick="promptDelete('${u.id}','${esc(u.email)}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase();
+  const filtered = allUsers.filter(u => (u.email || '').toLowerCase().includes(q));
+  renderTable(filtered);
+});
+
+// ── CREATE USER ───────────────────────────────────────────────────
+const createModal  = document.getElementById('createModal');
+const modalErr     = document.getElementById('modalErr');
+
+document.getElementById('openCreateBtn').addEventListener('click', openCreate);
+document.getElementById('closeCreateModal').addEventListener('click', closeCreate);
+document.getElementById('cancelCreate').addEventListener('click', closeCreate);
+createModal.addEventListener('click', (e) => { if (e.target === createModal) closeCreate(); });
+
+function openCreate() {
+  document.getElementById('newEmail').value = '';
+  document.getElementById('newPassword').value = '';
+  document.getElementById('newPasswordConfirm').value = '';
+  modalErr.textContent = '';
+  createModal.classList.add('open');
+  setTimeout(() => document.getElementById('newEmail').focus(), 50);
+}
+function closeCreate() { createModal.classList.remove('open'); }
+
+document.getElementById('submitCreate').addEventListener('click', async () => {
+  const email   = document.getElementById('newEmail').value.trim();
+  const pass    = document.getElementById('newPassword').value;
+  const confirm = document.getElementById('newPasswordConfirm').value;
+  const btn     = document.getElementById('submitCreate');
+  modalErr.textContent = '';
+
+  if (!email)        { modalErr.textContent = 'Email is required.'; return; }
+  if (!pass)         { modalErr.textContent = 'Password is required.'; return; }
+  if (pass.length < 8) { modalErr.textContent = 'Password must be at least 8 characters.'; return; }
+  if (pass !== confirm) { modalErr.textContent = 'Passwords do not match.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Creating…';
+
+  try {
+    const { data, error } = await sb.auth.admin.createUser({
+      email,
+      password: pass,
+      email_confirm: true
+    });
+    if (error) throw error;
+    closeCreate();
+    showToast('✅ User created: ' + email, 'success');
+    allUsers.unshift(data.user);
+    updateStats(allUsers);
+    renderTable(allUsers);
+  } catch (err) {
+    modalErr.textContent = '❌ ' + err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Create User';
+  }
+});
+
+// ── DELETE USER ───────────────────────────────────────────────────
+const deleteModal = document.getElementById('deleteModal');
+
+function promptDelete(id, email) {
+  deleteTargetId = id;
+  document.getElementById('delEmailLabel').textContent = email;
+  deleteModal.classList.add('open');
+}
+document.getElementById('cancelDelete').addEventListener('click', () => {
+  deleteModal.classList.remove('open');
+  deleteTargetId = null;
+});
+deleteModal.addEventListener('click', (e) => {
+  if (e.target === deleteModal) { deleteModal.classList.remove('open'); deleteTargetId = null; }
+});
+document.getElementById('confirmDelete').addEventListener('click', async () => {
+  if (!deleteTargetId) return;
+  const btn = document.getElementById('confirmDelete');
+  btn.disabled = true;
+  btn.textContent = 'Deleting…';
+  try {
+    const { error } = await sb.auth.admin.deleteUser(deleteTargetId);
+    if (error) throw error;
+    allUsers = allUsers.filter(u => u.id !== deleteTargetId);
+    updateStats(allUsers);
+    renderTable(allUsers);
+    deleteModal.classList.remove('open');
+    showToast('🗑️ User deleted.', 'success');
+  } catch (err) {
+    showToast('❌ ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Delete';
+    deleteTargetId = null;
+  }
+});
+
+// ── HELPERS ───────────────────────────────────────────────────────
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+function esc(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+let toastTimer;
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, 3200);
+}
+</script>
+</body>
+</html>
