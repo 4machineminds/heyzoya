@@ -240,12 +240,17 @@
   }
   .modal {
     background: var(--panel); border: 1px solid var(--border2); border-radius: 20px;
-    padding: 32px; width: 100%; max-width: 460px;
+    width: 100%; max-width: 600px;
+    max-height: 90vh; display: flex; flex-direction: column;
     transform: scale(.96) translateY(8px);
     transition: transform .22s ease;
   }
   .modal-overlay.open .modal { transform: scale(1) translateY(0); }
-  .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 28px 28px 20px; flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+  }
   .modal-head h3 { font-size: 18px; font-weight: 700; color: #fff; }
   .modal-close {
     width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
@@ -253,17 +258,34 @@
     display: flex; align-items: center; justify-content: center; transition: all .2s;
   }
   .modal-close:hover { background: rgba(255,255,255,.05); color: #fff; }
-  .m-field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
-  .m-field label { font-size: 11.5px; font-weight: 600; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
-  .m-field input {
-    width: 100%; padding: 12px 14px;
+  .modal-body { padding: 24px 28px; overflow-y: auto; flex: 1; }
+  .m-section {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--muted);
+    margin: 20px 0 14px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .m-section:first-child { margin-top: 0; }
+  .m-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .m-field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+  .m-field label { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
+  .m-field input, .m-field select, .m-field textarea {
+    width: 100%; padding: 11px 13px;
     background: rgba(255,255,255,0.04); border: 1px solid var(--border2);
-    border-radius: 10px; color: #fff; font-size: 14px; font-family: inherit;
+    border-radius: 10px; color: #fff; font-size: 13.5px; font-family: inherit;
     outline: none; transition: border-color .2s, box-shadow .2s;
   }
-  .m-field input:focus { border-color: rgba(242,185,184,.5); box-shadow: 0 0 0 3px rgba(242,185,184,.08); }
-  .m-field input::placeholder { color: var(--muted); }
-  .modal-footer { display: flex; gap: 10px; margin-top: 24px; }
+  .m-field input:focus, .m-field select:focus, .m-field textarea:focus {
+    border-color: rgba(242,185,184,.5); box-shadow: 0 0 0 3px rgba(242,185,184,.08);
+  }
+  .m-field input::placeholder, .m-field textarea::placeholder { color: var(--muted); }
+  .m-field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237b8ba5' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; cursor: pointer; }
+  .m-field select option { background: #0d0f1a; color: #fff; }
+  .m-field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  .modal-footer {
+    display: flex; gap: 10px; padding: 20px 28px;
+    border-top: 1px solid var(--border); flex-shrink: 0;
+  }
   .btn-cancel {
     flex: 1; padding: 12px; background: none; border: 1px solid var(--border2);
     border-radius: 10px; color: var(--muted2); font-size: 14px; font-weight: 600;
@@ -442,19 +464,71 @@
       <h3>Create New User</h3>
       <button class="modal-close" id="closeCreateModal">✕</button>
     </div>
-    <div class="m-field">
-      <label>Email Address</label>
-      <input type="email" id="newEmail" placeholder="user@company.com" autocomplete="off">
+    <div class="modal-body">
+
+      <div class="m-section">Personal Information</div>
+      <div class="m-row">
+        <div class="m-field">
+          <label>First Name</label>
+          <input type="text" id="newFirstName" placeholder="First name" autocomplete="off">
+        </div>
+        <div class="m-field">
+          <label>Last Name</label>
+          <input type="text" id="newLastName" placeholder="Last name" autocomplete="off">
+        </div>
+      </div>
+      <div class="m-field">
+        <label>Email Address <span style="color:var(--danger)">*</span></label>
+        <input type="email" id="newEmail" placeholder="user@company.com" autocomplete="off">
+      </div>
+      <div class="m-row">
+        <div class="m-field">
+          <label>Phone</label>
+          <input type="tel" id="newPhone" placeholder="+1 (555) 000-0000" autocomplete="off">
+        </div>
+        <div class="m-field">
+          <label>Industry</label>
+          <select id="newIndustry">
+            <option value="">Select industry</option>
+            <option value="salons_spas">Salons &amp; Spas</option>
+            <option value="home_services">Home Services</option>
+            <option value="legal_practices">Legal Practices</option>
+            <option value="automotive_repair">Automotive Repair</option>
+            <option value="small_business">Small Business</option>
+            <option value="real_estate">Real Estate</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="m-section">Business Information</div>
+      <div class="m-field">
+        <label>Business Name</label>
+        <input type="text" id="newBizName" placeholder="My Business" autocomplete="off">
+      </div>
+      <div class="m-field">
+        <label>Website</label>
+        <input type="url" id="newWebsite" placeholder="https://yourbusiness.com" autocomplete="off">
+      </div>
+      <div class="m-field">
+        <label>Business Description</label>
+        <textarea id="newBizDesc" placeholder="Brief description of your business…"></textarea>
+      </div>
+
+      <div class="m-section">Account Credentials</div>
+      <div class="m-row">
+        <div class="m-field">
+          <label>Password <span style="color:var(--danger)">*</span></label>
+          <input type="password" id="newPassword" placeholder="Min 8 characters" autocomplete="new-password">
+        </div>
+        <div class="m-field">
+          <label>Confirm Password <span style="color:var(--danger)">*</span></label>
+          <input type="password" id="newPasswordConfirm" placeholder="Repeat password" autocomplete="new-password">
+        </div>
+      </div>
+
+      <div id="modalErr"></div>
     </div>
-    <div class="m-field">
-      <label>Password</label>
-      <input type="password" id="newPassword" placeholder="Min 8 characters" autocomplete="new-password">
-    </div>
-    <div class="m-field">
-      <label>Confirm Password</label>
-      <input type="password" id="newPasswordConfirm" placeholder="Repeat password" autocomplete="new-password">
-    </div>
-    <div id="modalErr"></div>
     <div class="modal-footer">
       <button class="btn-cancel" id="cancelCreate">Cancel</button>
       <button class="btn-submit" id="submitCreate">Create User</button>
@@ -616,26 +690,35 @@ document.getElementById('cancelCreate').addEventListener('click', closeCreate);
 createModal.addEventListener('click', (e) => { if (e.target === createModal) closeCreate(); });
 
 function openCreate() {
-  document.getElementById('newEmail').value = '';
-  document.getElementById('newPassword').value = '';
-  document.getElementById('newPasswordConfirm').value = '';
+  ['newFirstName','newLastName','newEmail','newPhone','newBizName','newWebsite','newBizDesc','newPassword','newPasswordConfirm'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('newIndustry').value = '';
   modalErr.textContent = '';
   createModal.classList.add('open');
-  setTimeout(() => document.getElementById('newEmail').focus(), 50);
+  setTimeout(() => document.getElementById('newFirstName').focus(), 50);
 }
 function closeCreate() { createModal.classList.remove('open'); }
 
 document.getElementById('submitCreate').addEventListener('click', async () => {
-  const email   = document.getElementById('newEmail').value.trim();
-  const pass    = document.getElementById('newPassword').value;
-  const confirm = document.getElementById('newPasswordConfirm').value;
-  const btn     = document.getElementById('submitCreate');
+  const firstName  = document.getElementById('newFirstName').value.trim();
+  const lastName   = document.getElementById('newLastName').value.trim();
+  const email      = document.getElementById('newEmail').value.trim();
+  const phone      = document.getElementById('newPhone').value.trim();
+  const industry   = document.getElementById('newIndustry').value;
+  const bizName    = document.getElementById('newBizName').value.trim();
+  const website    = document.getElementById('newWebsite').value.trim();
+  const bizDesc    = document.getElementById('newBizDesc').value.trim();
+  const pass       = document.getElementById('newPassword').value;
+  const confirm    = document.getElementById('newPasswordConfirm').value;
+  const btn        = document.getElementById('submitCreate');
   modalErr.textContent = '';
 
-  if (!email)        { modalErr.textContent = 'Email is required.'; return; }
-  if (!pass)         { modalErr.textContent = 'Password is required.'; return; }
-  if (pass.length < 8) { modalErr.textContent = 'Password must be at least 8 characters.'; return; }
-  if (pass !== confirm) { modalErr.textContent = 'Passwords do not match.'; return; }
+  if (!email)           { modalErr.textContent = 'Email is required.'; return; }
+  if (!pass)            { modalErr.textContent = 'Password is required.'; return; }
+  if (pass.length < 8)  { modalErr.textContent = 'Password must be at least 8 characters.'; return; }
+  if (pass !== confirm)  { modalErr.textContent = 'Passwords do not match.'; return; }
 
   btn.disabled = true;
   btn.textContent = 'Creating…';
@@ -644,7 +727,17 @@ document.getElementById('submitCreate').addEventListener('click', async () => {
     const { data, error } = await sb.auth.admin.createUser({
       email,
       password: pass,
-      email_confirm: true
+      email_confirm: true,
+      user_metadata: {
+        first_name:    firstName,
+        last_name:     lastName,
+        full_name:     [firstName, lastName].filter(Boolean).join(' ') || undefined,
+        phone:         phone || undefined,
+        industry:      industry || undefined,
+        business_name: bizName || undefined,
+        website:       website || undefined,
+        business_description: bizDesc || undefined,
+      }
     });
     if (error) throw error;
     closeCreate();
