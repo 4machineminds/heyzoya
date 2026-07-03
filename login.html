@@ -340,9 +340,9 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnaWN6dWt1Y2l2aWl2aHdqYnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MjEwODksImV4cCI6MjA5ODM5NzA4OX0.UCv6mFXST0jkt_180Bz0mskJc1anX_-5spcrXkVUGgE'
   );
 
-  // Redirect if already logged in
-  _supabase.auth.getSession().then(({ data: { session } }) => {
-    if (session) window.location.replace('dashboard.html');
+  // Redirect if already logged in (only if session is truly valid)
+  _supabase.auth.getSession().then(({ data: { session }, error }) => {
+    if (session && !error) window.location.replace('dashboard.html');
   });
 
   // Password visibility toggle
@@ -378,9 +378,7 @@
       btn.disabled = false;
       btn.textContent = 'Sign in';
     } else {
-      msg.style.color = '#4ef58a';
-      msg.textContent = '✅ Signed in! Redirecting…';
-      setTimeout(() => window.location.href = 'dashboard.html', 800);
+      window.location.replace('dashboard.html');
     }
   });
 </script>

@@ -608,7 +608,11 @@
   let currentUser = null;
   (async () => {
     const { data: { session } } = await _supabase.auth.getSession();
-    if (!session) { window.location.replace('login.html'); return; }
+    if (!session) {
+      await _supabase.auth.signOut();
+      window.location.replace('login.html');
+      return;
+    }
     currentUser = session.user;
 
     // ── POPULATE USER ──
