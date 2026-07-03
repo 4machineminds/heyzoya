@@ -802,6 +802,125 @@
     }
     .foot-copy { font-size: 12px; color: var(--muted); }
 
+    /* ── HAMBURGER + MOBILE MENU ── */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      background: none;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 0 8px;
+      width: 38px; height: 36px;
+      box-sizing: border-box;
+      flex-shrink: 0;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 18px; height: 1.5px;
+      background: #fff;
+      border-radius: 2px;
+      transition: transform 0.25s ease, opacity 0.2s ease;
+      transform-origin: center;
+    }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+    .mobile-menu {
+      position: fixed;
+      top: 66px; left: 0; right: 0;
+      background: rgba(8, 8, 18, 0.97);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      z-index: 199;
+      padding: 4px 20px 28px;
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 66px);
+      overflow-y: auto;
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: opacity 0.22s ease, transform 0.22s ease, visibility 0s linear 0.22s;
+      pointer-events: none;
+    }
+    .mobile-menu.open {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      pointer-events: auto;
+    }
+    .mob-link {
+      color: rgba(255,255,255,0.72);
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: block;
+      transition: color 0.15s;
+    }
+    .mob-link:hover { color: #fff; }
+    .mob-section-label {
+      color: rgba(255,255,255,0.32);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 18px 0 6px;
+      display: block;
+    }
+    .mob-sub-link {
+      color: rgba(255,255,255,0.52);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 400;
+      padding: 10px 0 10px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      display: block;
+      transition: color 0.15s;
+    }
+    .mob-sub-link:hover { color: rgba(255,255,255,0.85); }
+    .mob-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .mob-btn-login {
+      display: block;
+      text-align: center;
+      padding: 13px;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      color: rgba(255,255,255,0.82);
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .mob-btn-login:hover { border-color: rgba(255,255,255,0.35); color: #fff; }
+    .mob-btn-cta {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      border: none;
+      border-radius: 10px;
+      color: #111;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .mob-btn-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(247,217,161,0.2); }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 1000px) {
       section { padding: 80px 28px; }
@@ -826,9 +945,10 @@
       /* nav */
       .nav-inner { display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
       .nav-links { display: none; }
-      .nav-btns { gap: 6px; }
+      .nav-btns { gap: 6px; order: 2; }
       .btn-nav-ghost { font-size: 13px; padding: 7px 14px; }
       .btn-nav-primary { font-size: 13px; padding: 7px 14px; }
+      .nav-hamburger { display: flex; order: 3; }
 
       /* hero */
       .hero { padding-top: 100px; padding-bottom: 56px; }
@@ -1349,12 +1469,35 @@
       </div>
       <a href="#faq" class="nav-link">FAQ</a>
     </div>
+    <button class="nav-hamburger" id="hamburgerBtn" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
     <div class="nav-btns">
       <a href="login.html" class="btn-nav-ghost" id="loginBtn">Login</a>
       <button class="btn-nav-primary" id="demoBtn">Get Started</button>
     </div>
   </div>
 </nav>
+
+<!-- ── MOBILE MENU ── -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#features" class="mob-link">Features</a>
+  <a href="#how-it-works" class="mob-link">How It Works</a>
+  <span class="mob-section-label">Industries</span>
+  <a href="salons-spas.html" class="mob-sub-link">Salons &amp; Spas</a>
+  <a href="home-services.html" class="mob-sub-link">Home Services</a>
+  <a href="legal-practices.html" class="mob-sub-link">Legal Practices</a>
+  <a href="automotive-repair.html" class="mob-sub-link">Automotive Repair</a>
+  <a href="small-business.html" class="mob-sub-link">Small Business</a>
+  <a href="real-estate.html" class="mob-sub-link">Real Estate</a>
+  <a href="#pricing" class="mob-link">Pricing</a>
+  <a href="#faq" class="mob-link">FAQ</a>
+  <a href="#contact" class="mob-link">Contact</a>
+  <div class="mob-actions">
+    <a href="login.html" class="mob-btn-login">Login</a>
+    <button class="mob-btn-cta" id="mobGetStarted">Get Started</button>
+  </div>
+</div>
 
 <!-- ── HERO ── -->
 <section class="hero" id="hero">
@@ -2048,6 +2191,27 @@
       document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
       if (!isOpen) item.classList.add('open');
     });
+  });
+
+  // Hamburger / mobile menu toggle
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const mobileMenu   = document.getElementById('mobileMenu');
+  hamburgerBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = hamburgerBtn.classList.toggle('open');
+    mobileMenu.classList.toggle('open', isOpen);
+  });
+  mobileMenu.querySelectorAll('a, .mob-btn-cta').forEach(el => {
+    el.addEventListener('click', () => {
+      hamburgerBtn.classList.remove('open');
+      mobileMenu.classList.remove('open');
+    });
+  });
+  document.addEventListener('click', (e) => {
+    if (!mobileMenu.contains(e.target) && e.target !== hamburgerBtn) {
+      hamburgerBtn.classList.remove('open');
+      mobileMenu.classList.remove('open');
+    }
   });
 
   // Industries dropdown toggle
