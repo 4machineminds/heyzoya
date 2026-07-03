@@ -394,8 +394,13 @@
                       <label class="acct-label">Industry</label>
                       <select class="acct-input" id="acctIndustry">
                         <option value="">Select industry</option>
-                        <option>Real Estate</option><option>HVAC</option><option>Legal</option>
-                        <option>Healthcare</option><option>Automotive</option><option>Other</option>
+                        <option value="salons_spas">Salons &amp; Spas</option>
+                        <option value="home_services">Home Services</option>
+                        <option value="legal_practices">Legal Practices</option>
+                        <option value="automotive_repair">Automotive Repair</option>
+                        <option value="small_business">Small Business</option>
+                        <option value="real_estate">Real Estate</option>
+                        <option value="other">Other</option>
                       </select>
                     </div>
                   </div>
@@ -619,23 +624,32 @@
     function getInitials(name) {
       return (name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
     }
-    const meta        = currentUser.user_metadata || {};
-    const displayName = meta.full_name || meta.name || currentUser.email.split('@')[0];
-    const bizName     = meta.business_name || 'My Business';
+    const meta          = currentUser.user_metadata || {};
+    const firstName     = meta.first_name || '';
+    const lastName      = meta.last_name  || '';
+    const displayName   = meta.full_name  || [firstName, lastName].filter(Boolean).join(' ') || meta.name || currentUser.email.split('@')[0];
+    const bizName       = meta.business_name || '';
+    const phone         = meta.phone || '';
+    const industry      = meta.industry || '';
+    const website       = meta.website || '';
+    const bizDesc       = meta.business_description || '';
     const loggedInEmail = currentUser.email;
 
     document.getElementById('sidebarUserName').textContent = displayName;
-    document.getElementById('sidebarBizName').textContent = bizName;
-    document.getElementById('userAvatarInitial').textContent = getInitials(displayName);
+    document.getElementById('sidebarBizName').textContent  = bizName || 'My Business';
+    document.getElementById('userAvatarInitial').textContent  = getInitials(displayName);
     document.getElementById('topGreeting').textContent = `Welcome, ${displayName.split(' ')[0]} 👋`;
-    document.getElementById('acctAvatarInitial').textContent = getInitials(displayName);
-    document.getElementById('acctName').textContent = displayName;
+    document.getElementById('acctAvatarInitial').textContent  = getInitials(displayName);
+    document.getElementById('acctName').textContent  = displayName;
     document.getElementById('acctEmail').textContent = loggedInEmail;
-    document.getElementById('acctEmailInput').value = loggedInEmail;
-    document.getElementById('acctBizName').value = bizName;
-    const nameParts = displayName.split(' ');
-    document.getElementById('acctFirstName').value = nameParts[0] || '';
-    document.getElementById('acctLastName').value = nameParts.slice(1).join(' ') || '';
+    document.getElementById('acctEmailInput').value  = loggedInEmail;
+    document.getElementById('acctFirstName').value   = firstName || displayName.split(' ')[0] || '';
+    document.getElementById('acctLastName').value    = lastName  || displayName.split(' ').slice(1).join(' ') || '';
+    document.getElementById('acctPhone').value       = phone;
+    document.getElementById('acctIndustry').value    = industry;
+    document.getElementById('acctBizName').value     = bizName;
+    document.getElementById('acctWebsite').value     = website;
+    document.getElementById('acctBizDesc').value     = bizDesc;
   })();
 
   // stats
@@ -807,22 +821,44 @@
 
   // ── PROFILE SAVE ──
   function loadProfile() {
-    document.getElementById('acctFirstName').value = nameParts[0] || '';
-    document.getElementById('acctLastName').value = nameParts.slice(1).join(' ') || '';
-    document.getElementById('acctBizName').value = bizName;
+    document.getElementById('acctFirstName').value = firstName || displayName.split(' ')[0] || '';
+    document.getElementById('acctLastName').value  = lastName  || displayName.split(' ').slice(1).join(' ') || '';
+    document.getElementById('acctPhone').value     = phone;
+    document.getElementById('acctIndustry').value  = industry;
+    document.getElementById('acctBizName').value   = bizName;
+    document.getElementById('acctWebsite').value   = website;
+    document.getElementById('acctBizDesc').value   = bizDesc;
     showToast('Changes discarded.');
   }
 
-  function saveProfile() {
-    const fn = document.getElementById('acctFirstName').value.trim();
-    const ln = document.getElementById('acctLastName').value.trim();
-    const biz = document.getElementById('acctBizName').value.trim();
-    const fullName = [fn, ln].filter(Boolean).join(' ');
-    const updatedData = { ...userData, name: fullName, businessName: biz };
-    localStorage.setItem(loggedInEmail, JSON.stringify(updatedData));
-    document.getElementById('sidebarUserName').textContent = fullName;
-    document.getElementById('sidebarBizName').textContent = biz;
-    document.getElementById('acctName').textContent = fullName;
+  async function saveProfile() {
+    const fn       = document.getElementById('acctFirstName').value.trim();
+    const ln       = document.getElementById('acctLastName').value.trim();
+    const ph       = document.getElementById('acctPhone').value.trim();
+    const ind      = document.getElementById('acctIndustry').value;
+    const biz      = document.getElementById('acctBizName').value.trim();
+    const web      = document.getElementById('acctWebsite').value.trim();
+    const desc     = document.getElementById('acctBizDesc').value.trim();
+    const fullName = [fn, ln].filter(Boolean).join(' ') || fn;
+
+    const { error } = await _supabase.auth.updateUser({
+      data: {
+        first_name:           fn,
+        last_name:            ln,
+        full_name:            fullName,
+        phone:                ph || null,
+        industry:             ind || null,
+        business_name:        biz || null,
+        website:              web || null,
+        business_description: desc || null,
+      }
+    });
+
+    if (error) { showToast('Save failed: ' + error.message); return; }
+
+    document.getElementById('sidebarUserName').textContent  = fullName;
+    document.getElementById('sidebarBizName').textContent   = biz || 'My Business';
+    document.getElementById('acctName').textContent         = fullName;
     document.getElementById('acctAvatarInitial').textContent = getInitials(fullName);
     document.getElementById('userAvatarInitial').textContent = getInitials(fullName);
     showToast('Profile saved successfully!');
