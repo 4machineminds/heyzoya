@@ -611,6 +611,12 @@
 
   // ── AUTH CHECK ──
   let currentUser = null;
+  let firstName = '', lastName = '', displayName = '', bizName = '', phone = '', industry = '', website = '', bizDesc = '';
+
+  function getInitials(name) {
+    return (name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+  }
+
   (async () => {
     const { data: { session } } = await _supabase.auth.getSession();
     if (!session) {
@@ -621,35 +627,32 @@
     currentUser = session.user;
 
     // ── POPULATE USER ──
-    function getInitials(name) {
-      return (name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
-    }
-    const meta          = currentUser.user_metadata || {};
-    const firstName     = meta.first_name || '';
-    const lastName      = meta.last_name  || '';
-    const displayName   = meta.full_name  || [firstName, lastName].filter(Boolean).join(' ') || meta.name || currentUser.email.split('@')[0];
-    const bizName       = meta.business_name || '';
-    const phone         = meta.phone || '';
-    const industry      = meta.industry || '';
-    const website       = meta.website || '';
-    const bizDesc       = meta.business_description || '';
+    const meta    = currentUser.user_metadata || {};
+    firstName     = meta.first_name || '';
+    lastName      = meta.last_name  || '';
+    displayName   = meta.full_name  || [firstName, lastName].filter(Boolean).join(' ') || meta.name || currentUser.email.split('@')[0];
+    bizName       = meta.business_name || '';
+    phone         = meta.phone || '';
+    industry      = meta.industry || '';
+    website       = meta.website || '';
+    bizDesc       = meta.business_description || '';
     const loggedInEmail = currentUser.email;
 
-    document.getElementById('sidebarUserName').textContent = displayName;
-    document.getElementById('sidebarBizName').textContent  = bizName || 'My Business';
+    document.getElementById('sidebarUserName').textContent    = displayName;
+    document.getElementById('sidebarBizName').textContent     = bizName || 'My Business';
     document.getElementById('userAvatarInitial').textContent  = getInitials(displayName);
-    document.getElementById('topGreeting').textContent = `Welcome, ${displayName.split(' ')[0]} 👋`;
+    document.getElementById('topGreeting').textContent        = `Welcome, ${displayName.split(' ')[0]} 👋`;
     document.getElementById('acctAvatarInitial').textContent  = getInitials(displayName);
-    document.getElementById('acctName').textContent  = displayName;
-    document.getElementById('acctEmail').textContent = loggedInEmail;
-    document.getElementById('acctEmailInput').value  = loggedInEmail;
-    document.getElementById('acctFirstName').value   = firstName || displayName.split(' ')[0] || '';
-    document.getElementById('acctLastName').value    = lastName  || displayName.split(' ').slice(1).join(' ') || '';
-    document.getElementById('acctPhone').value       = phone;
-    document.getElementById('acctIndustry').value    = industry;
-    document.getElementById('acctBizName').value     = bizName;
-    document.getElementById('acctWebsite').value     = website;
-    document.getElementById('acctBizDesc').value     = bizDesc;
+    document.getElementById('acctName').textContent           = displayName;
+    document.getElementById('acctEmail').textContent          = loggedInEmail;
+    document.getElementById('acctEmailInput').value           = loggedInEmail;
+    document.getElementById('acctFirstName').value            = firstName || displayName.split(' ')[0] || '';
+    document.getElementById('acctLastName').value             = lastName  || displayName.split(' ').slice(1).join(' ') || '';
+    document.getElementById('acctPhone').value                = phone;
+    document.getElementById('acctIndustry').value             = industry;
+    document.getElementById('acctBizName').value              = bizName;
+    document.getElementById('acctWebsite').value              = website;
+    document.getElementById('acctBizDesc').value              = bizDesc;
   })();
 
   // stats

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Getting Started — HeyZoya</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="assets/images/heyZoyaLogo.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:      #06080f;
+    --panel:   #0d0f1a;
+    --card:    rgba(255,255,255,0.04);
+    --border:  rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --accent1: #f2b9b8;
+    --accent2: #f7d9a1;
+    --text:    #dde8f5;
+    --muted:   #7b8ba5;
+    --muted2:  #9aabc2;
+    --success: #4ef58a;
+  }
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 20px 60px; -webkit-font-smoothing: antialiased; }
+
+  /* ── TOP BAR ── */
+  .topbar { width: 100%; max-width: 680px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .brand img { width: 34px; filter: drop-shadow(0 0 8px rgba(242,185,184,.4)); }
+  .brand span { font-size: 17px; font-weight: 700; color: #fff; }
+  .logout-link { font-size: 13px; color: var(--muted); text-decoration: none; transition: color .2s; }
+  .logout-link:hover { color: #fff; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap { width: 100%; max-width: 680px; margin-bottom: 36px; }
+  .progress-steps { display: flex; align-items: center; gap: 0; margin-bottom: 12px; }
+  .step-node {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    border: 2px solid var(--border2); color: var(--muted);
+    background: var(--panel); transition: all .3s;
+    position: relative; z-index: 1;
+  }
+  .step-node.active { border-color: var(--accent2); color: var(--accent2); background: rgba(247,217,161,.08); }
+  .step-node.done { border-color: var(--success); background: rgba(78,245,138,.1); color: var(--success); }
+  .step-line { flex: 1; height: 2px; background: var(--border2); transition: background .3s; }
+  .step-line.done { background: var(--success); }
+  .progress-labels { display: flex; justify-content: space-between; }
+  .step-label { font-size: 11px; color: var(--muted); font-weight: 500; text-align: center; flex: 1; }
+  .step-label:first-child { text-align: left; }
+  .step-label:last-child { text-align: right; }
+  .step-label.active { color: var(--accent2); }
+  .step-label.done { color: var(--success); }
+
+  /* ── CARD ── */
+  .card {
+    width: 100%; max-width: 680px;
+    background: var(--panel); border: 1px solid var(--border2);
+    border-radius: 20px; overflow: hidden;
+  }
+  .card-header { padding: 28px 36px 24px; border-bottom: 1px solid var(--border); }
+  .step-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(247,217,161,.1); border: 1px solid rgba(247,217,161,.2); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 700; color: var(--accent2); letter-spacing: .5px; text-transform: uppercase; margin-bottom: 14px; }
+  .card-header h1 { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+  .card-header p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .card-body { padding: 28px 36px; }
+  .card-footer { padding: 20px 36px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+  /* ── FORM FIELDS ── */
+  .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+  .f-field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
+  .f-field:last-child { margin-bottom: 0; }
+  .f-label { font-size: 11.5px; font-weight: 600; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; }
+  .f-input, .f-select, .f-textarea {
+    width: 100%; padding: 12px 14px;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border2);
+    border-radius: 10px; color: #fff; font-size: 14px; font-family: inherit;
+    outline: none; transition: border-color .2s, box-shadow .2s;
+  }
+  .f-input:focus, .f-select:focus, .f-textarea:focus {
+    border-color: rgba(242,185,184,.5); box-shadow: 0 0 0 3px rgba(242,185,184,.08);
+  }
+  .f-input::placeholder, .f-textarea::placeholder { color: var(--muted); }
+  .f-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237b8ba5' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 13px center; padding-right: 36px; cursor: pointer; }
+  .f-select option { background: #0d0f1a; color: #fff; }
+  .f-textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+  .f-hint { font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+
+  /* ── DAYS PICKER ── */
+  .days-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+  .day-chip input { display: none; }
+  .day-chip label {
+    display: flex; align-items: center; justify-content: center;
+    width: 42px; height: 38px; border-radius: 9px;
+    border: 1px solid var(--border2); cursor: pointer;
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    transition: all .2s; user-select: none;
+  }
+  .day-chip input:checked + label {
+    background: rgba(247,217,161,.12); border-color: rgba(247,217,161,.35);
+    color: var(--accent2);
+  }
+
+  /* ── TASK CHECKBOXES ── */
+  .task-list { display: flex; flex-direction: column; gap: 10px; }
+  .task-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border-radius: 12px;
+    border: 1px solid var(--border2); cursor: pointer;
+    transition: all .2s; user-select: none;
+  }
+  .task-item:hover { border-color: rgba(247,217,161,.2); background: rgba(255,255,255,.02); }
+  .task-item.checked { border-color: rgba(247,217,161,.3); background: rgba(247,217,161,.06); }
+  .task-check {
+    width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0;
+    border: 2px solid var(--border2); display: flex; align-items: center;
+    justify-content: center; transition: all .2s;
+  }
+  .task-item.checked .task-check { background: linear-gradient(135deg, var(--accent1), var(--accent2)); border-color: transparent; }
+  .task-check svg { display: none; }
+  .task-item.checked .task-check svg { display: block; }
+  .task-info { flex: 1; }
+  .task-title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 2px; }
+  .task-desc { font-size: 12px; color: var(--muted); }
+  .task-icon { font-size: 22px; }
+
+  /* ── FAQ ROWS ── */
+  .faq-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .faq-row .f-input { font-size: 13px; padding: 10px 12px; }
+  .add-faq-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: none; border: 1px dashed var(--border2); border-radius: 9px;
+    color: var(--muted); font-size: 13px; font-weight: 500; font-family: inherit;
+    padding: 9px 14px; cursor: pointer; transition: all .2s; margin-top: 4px;
+  }
+  .add-faq-btn:hover { border-color: rgba(247,217,161,.3); color: var(--accent2); }
+
+  /* ── PHONE STEP ── */
+  .phone-option {
+    border: 1px solid var(--border2); border-radius: 14px; padding: 20px 22px;
+    margin-bottom: 14px; cursor: pointer; transition: all .2s; position: relative;
+  }
+  .phone-option:hover { border-color: rgba(247,217,161,.2); }
+  .phone-option.selected { border-color: rgba(247,217,161,.4); background: rgba(247,217,161,.05); }
+  .phone-option-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .po-radio {
+    width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border2);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: all .2s;
+  }
+  .phone-option.selected .po-radio { border-color: var(--accent2); }
+  .po-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent2); display: none; }
+  .phone-option.selected .po-dot { display: block; }
+  .po-title { font-size: 15px; font-weight: 600; color: #fff; }
+  .po-desc { font-size: 13px; color: var(--muted); line-height: 1.6; padding-left: 30px; }
+  .po-body { margin-top: 14px; padding-left: 30px; display: none; }
+  .phone-option.selected .po-body { display: block; }
+  .copy-box {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,.04); border: 1px solid var(--border2);
+    border-radius: 10px; padding: 10px 14px;
+  }
+  .copy-box span { flex: 1; font-size: 15px; font-weight: 600; color: var(--accent2); font-family: monospace; }
+  .copy-btn {
+    background: rgba(247,217,161,.1); border: 1px solid rgba(247,217,161,.2);
+    border-radius: 7px; color: var(--accent2); font-size: 12px; font-weight: 600;
+    font-family: inherit; padding: 5px 12px; cursor: pointer; transition: all .2s;
+  }
+  .copy-btn:hover { background: rgba(247,217,161,.18); }
+  .notice-box {
+    display: flex; gap: 10px; background: rgba(78,245,138,.06);
+    border: 1px solid rgba(78,245,138,.12); border-radius: 10px; padding: 12px 14px; margin-top: 14px;
+  }
+  .notice-box span { font-size: 13px; color: rgba(78,245,138,.85); line-height: 1.6; }
+
+  /* ── SUCCESS STEP ── */
+  .success-wrap { text-align: center; padding: 20px 0 10px; }
+  .success-icon { font-size: 56px; margin-bottom: 20px; }
+  .success-wrap h2 { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 10px; }
+  .success-wrap p { font-size: 15px; color: var(--muted); line-height: 1.7; max-width: 400px; margin: 0 auto 28px; }
+  .summary-pills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 28px; }
+  .sum-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.04); border: 1px solid var(--border2);
+    border-radius: 20px; padding: 6px 14px; font-size: 13px; color: var(--muted2);
+  }
+  .sum-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
+
+  /* ── BUTTONS ── */
+  .btn-next {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: #111; font-size: 14px; font-weight: 700; font-family: inherit;
+    border: none; border-radius: 10px; padding: 12px 28px; cursor: pointer;
+    transition: all .2s; display: flex; align-items: center; gap: 8px;
+  }
+  .btn-next:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(247,217,161,.22); }
+  .btn-next:disabled { opacity: .6; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-back {
+    background: none; border: 1px solid var(--border2); border-radius: 10px;
+    color: var(--muted2); font-size: 14px; font-weight: 500; font-family: inherit;
+    padding: 12px 22px; cursor: pointer; transition: all .2s;
+  }
+  .btn-back:hover { border-color: rgba(255,255,255,.2); color: #fff; }
+  .btn-dashboard {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: #111; font-size: 15px; font-weight: 700; font-family: inherit;
+    border: none; border-radius: 12px; padding: 14px 36px; cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-dashboard:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(247,217,161,.25); }
+
+  .step-count { font-size: 13px; color: var(--muted); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    body { padding: 24px 16px 48px; }
+    .topbar { margin-bottom: 28px; }
+    .card-header { padding: 22px 22px 18px; }
+    .card-body   { padding: 22px; }
+    .card-footer { padding: 16px 22px; }
+    .f-row { grid-template-columns: 1fr; }
+    .faq-row { grid-template-columns: 1fr; }
+    .card-header h1 { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a href="index.html" class="brand">
+    <img src="assets/images/heyZoyaLogo.png" alt="HeyZoya">
+    <span>HeyZoya</span>
+  </a>
+  <a href="#" class="logout-link" id="logoutBtn">Sign out</a>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-steps">
+    <div class="step-node active" id="sn1">1</div>
+    <div class="step-line" id="sl1"></div>
+    <div class="step-node" id="sn2">2</div>
+    <div class="step-line" id="sl2"></div>
+    <div class="step-node" id="sn3">3</div>
+    <div class="step-line" id="sl3"></div>
+    <div class="step-node" id="sn4">4</div>
+  </div>
+  <div class="progress-labels">
+    <span class="step-label active" id="sl-1">Business</span>
+    <span class="step-label" id="sl-2">Configure Zoya</span>
+    <span class="step-label" id="sl-3">Phone</span>
+    <span class="step-label" id="sl-4">All Set</span>
+  </div>
+</div>
+
+<!-- CARD -->
+<div class="card">
+
+  <!-- ── STEP 1: BUSINESS INFO ── -->
+  <div id="step1">
+    <div class="card-header">
+      <div class="step-badge">Step 1 of 4</div>
+      <h1>Tell us about your business</h1>
+      <p>Zoya will use this to introduce herself and handle your calls correctly.</p>
+    </div>
+    <div class="card-body">
+      <div class="f-row">
+        <div class="f-field" style="margin-bottom:0">
+          <label class="f-label">Business Name <span style="color:#f87171">*</span></label>
+          <input class="f-input" id="bizName" type="text" placeholder="e.g. Zara's Salon">
+        </div>
+        <div class="f-field" style="margin-bottom:0">
+          <label class="f-label">Industry <span style="color:#f87171">*</span></label>
+          <select class="f-select" id="bizIndustry">
+            <option value="">Select industry</option>
+            <option value="salons_spas">Salons &amp; Spas</option>
+            <option value="home_services">Home Services</option>
+            <option value="legal_practices">Legal Practices</option>
+            <option value="automotive_repair">Automotive Repair</option>
+            <option value="small_business">Small Business</option>
+            <option value="real_estate">Real Estate</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:18px" class="f-field">
+        <label class="f-label">Business Hours</label>
+        <div class="f-row" style="margin-bottom:8px">
+          <div class="f-field" style="margin-bottom:0">
+            <label class="f-label" style="font-size:10px">Opens At</label>
+            <input class="f-input" id="hoursOpen" type="time" value="09:00">
+          </div>
+          <div class="f-field" style="margin-bottom:0">
+            <label class="f-label" style="font-size:10px">Closes At</label>
+            <input class="f-input" id="hoursClose" type="time" value="18:00">
+          </div>
+        </div>
+        <label class="f-label" style="margin-bottom:8px;display:block">Working Days</label>
+        <div class="days-grid">
+          <label class="day-chip"><input type="checkbox" name="day" value="Mon" checked><label>Mon</label></label>
+          <label class="day-chip"><input type="checkbox" name="day" value="Tue" checked><label>Tue</label></label>
+          <label class="day-chip"><input type="checkbox" name="day" value="Wed" checked><label>Wed</label></label>
+          <label class="day-chip"><input type="checkbox" name="day" value="Thu" checked><label>Thu</label></label>
+          <label class="day-chip"><input type="checkbox" name="day" value="Fri" checked><label>Fri</label></label>
+          <label class="day-chip"><input type="checkbox" name="day" value="Sat"><label>Sat</label></label>
+          <label class="day-chip"><input type="checkbox" name="day" value="Sun"><label>Sun</label></label>
+        </div>
+      </div>
+      <div class="f-field">
+        <label class="f-label">Business Address <span style="color:var(--muted)">(optional)</span></label>
+        <input class="f-input" id="bizAddress" type="text" placeholder="123 Main St, City">
+      </div>
+      <div id="step1Err" style="font-size:13px;color:#f87171;margin-top:4px;min-height:18px"></div>
+    </div>
+    <div class="card-footer">
+      <span class="step-count">Step 1 of 4</span>
+      <button class="btn-next" id="next1">Next <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: CONFIGURE ZOYA ── -->
+  <div id="step2" style="display:none">
+    <div class="card-header">
+      <div class="step-badge">Step 2 of 4</div>
+      <h1>Configure Zoya's behaviour</h1>
+      <p>Set how Zoya greets callers and what she handles for you.</p>
+    </div>
+    <div class="card-body">
+      <div class="f-field">
+        <label class="f-label">Greeting Script</label>
+        <textarea class="f-textarea" id="zoyaGreeting" rows="3" placeholder="How should Zoya answer your calls?"></textarea>
+        <span class="f-hint">Tip: Keep it friendly and include your business name. Example: "Hello! Thank you for calling Zara's Salon. How can I help you today?"</span>
+      </div>
+
+      <div class="f-field">
+        <label class="f-label">What should Zoya do?</label>
+        <div class="task-list">
+          <div class="task-item checked" data-task="book_appointments" onclick="toggleTask(this)">
+            <span class="task-icon">📅</span>
+            <div class="task-info">
+              <div class="task-title">Book Appointments</div>
+              <div class="task-desc">Zoya collects details and schedules bookings</div>
+            </div>
+            <div class="task-check">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+          <div class="task-item checked" data-task="capture_leads" onclick="toggleTask(this)">
+            <span class="task-icon">🎯</span>
+            <div class="task-info">
+              <div class="task-title">Capture Leads</div>
+              <div class="task-desc">Collect caller name, number and reason for calling</div>
+            </div>
+            <div class="task-check">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+          <div class="task-item" data-task="answer_faqs" onclick="toggleTask(this)">
+            <span class="task-icon">💬</span>
+            <div class="task-info">
+              <div class="task-title">Answer FAQs</div>
+              <div class="task-desc">Zoya answers common questions about your business</div>
+            </div>
+            <div class="task-check">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+          <div class="task-item" data-task="forward_calls" onclick="toggleTask(this)">
+            <span class="task-icon">📲</span>
+            <div class="task-info">
+              <div class="task-title">Forward Urgent Calls</div>
+              <div class="task-desc">Transfer the call to you when the caller needs immediate help</div>
+            </div>
+            <div class="task-check">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="f-field" id="faqSection" style="display:none">
+        <label class="f-label">Common Questions &amp; Answers <span style="color:var(--muted)">(optional)</span></label>
+        <div id="faqRows">
+          <div class="faq-row">
+            <input class="f-input" type="text" placeholder="Question e.g. What are your prices?">
+            <input class="f-input" type="text" placeholder="Answer e.g. Starting from $30">
+          </div>
+        </div>
+        <button class="add-faq-btn" id="addFaqBtn" type="button">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add another Q&A
+        </button>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn-back" id="back2">← Back</button>
+      <button class="btn-next" id="next2">Next <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: PHONE SETUP ── -->
+  <div id="step3" style="display:none">
+    <div class="card-header">
+      <div class="step-badge">Step 3 of 4</div>
+      <h1>Set up your phone</h1>
+      <p>Choose how Zoya should receive your business calls.</p>
+    </div>
+    <div class="card-body">
+
+      <div class="phone-option selected" id="opt-forward" onclick="selectPhoneOption('forward')">
+        <div class="phone-option-head">
+          <div class="po-radio"><div class="po-dot"></div></div>
+          <div class="po-title">Forward my existing number</div>
+        </div>
+        <div class="po-desc">Keep your current business number. Just forward calls to Zoya's number.</div>
+        <div class="po-body">
+          <label class="f-label" style="margin-bottom:8px;display:block">Your Business Number</label>
+          <input class="f-input" id="existingPhone" type="tel" placeholder="+92 300 000 0000" style="margin-bottom:14px">
+          <label class="f-label" style="margin-bottom:8px;display:block">Forward Calls To This Zoya Number</label>
+          <div class="copy-box">
+            <span id="zoyaNumber">+1 (888) 555 — 0192</span>
+            <button class="copy-btn" onclick="copyNumber(event)">Copy</button>
+          </div>
+          <div class="notice-box" style="margin-top:12px">
+            <span>ℹ️ &nbsp;Our team will contact you within 24 hours to confirm your dedicated Zoya number and complete the setup.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone-option" id="opt-new" onclick="selectPhoneOption('new')">
+        <div class="phone-option-head">
+          <div class="po-radio"><div class="po-dot"></div></div>
+          <div class="po-title">Get a new number for Zoya</div>
+        </div>
+        <div class="po-desc">We'll provision a brand new number that Zoya answers directly.</div>
+        <div class="po-body">
+          <label class="f-label" style="margin-bottom:8px;display:block">Preferred Country Code</label>
+          <select class="f-select" id="newNumberCountry">
+            <option value="+1">🇺🇸 United States (+1)</option>
+            <option value="+44">🇬🇧 United Kingdom (+44)</option>
+            <option value="+92">🇵🇰 Pakistan (+92)</option>
+            <option value="+91">🇮🇳 India (+91)</option>
+            <option value="+971">🇦🇪 UAE (+971)</option>
+            <option value="+61">🇦🇺 Australia (+61)</option>
+            <option value="+1-ca">🇨🇦 Canada (+1)</option>
+          </select>
+          <div class="notice-box" style="margin-top:14px">
+            <span>ℹ️ &nbsp;Our team will provision your number and send it to you within 24 hours of completing setup.</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="card-footer">
+      <button class="btn-back" id="back3">← Back</button>
+      <button class="btn-next" id="next3">Next <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: ALL SET ── -->
+  <div id="step4" style="display:none">
+    <div class="card-body" style="padding:40px 36px">
+      <div class="success-wrap">
+        <div class="success-icon">🎉</div>
+        <h2>Zoya is almost ready!</h2>
+        <p>Your setup is complete. Our team will activate your Zoya agent and contact you within <strong style="color:var(--accent2)">24 hours</strong>.</p>
+        <div class="summary-pills" id="summaryPills"></div>
+        <button class="btn-dashboard" id="goDashboard">Go to Dashboard →</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end card -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const { createClient } = supabase;
+const _sb = createClient(
+  'https://tgiczukuciviivhwjbqu.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnaWN6dWt1Y2l2aWl2aHdqYnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MjEwODksImV4cCI6MjA5ODM5NzA4OX0.UCv6mFXST0jkt_180Bz0mskJc1anX_-5spcrXkVUGgE'
+);
+
+let currentUser = null;
+let currentStep = 1;
+
+// ── AUTH CHECK ──────────────────────────────────────────────────────
+(async () => {
+  const { data: { session } } = await _sb.auth.getSession();
+  if (!session) { window.location.replace('login.html'); return; }
+  currentUser = session.user;
+  const meta = currentUser.user_metadata || {};
+  if (meta.onboarding_complete) { window.location.replace('dashboard.html'); return; }
+
+  // Pre-fill business name from admin-set metadata
+  if (meta.business_name) document.getElementById('bizName').value = meta.business_name;
+  if (meta.industry)      document.getElementById('bizIndustry').value = meta.industry;
+
+  // Pre-fill greeting with business name
+  updateGreetingPlaceholder();
+})();
+
+document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+  e.preventDefault();
+  await _sb.auth.signOut();
+  window.location.replace('login.html');
+});
+
+// ── STEP NAVIGATION ─────────────────────────────────────────────────
+function showStep(n) {
+  [1,2,3,4].forEach(i => {
+    document.getElementById('step' + i).style.display = i === n ? 'block' : 'none';
+    const node  = document.getElementById('sn' + i);
+    const label = document.getElementById('sl-' + i);
+    if (i < n)  { node.classList.add('done'); node.classList.remove('active'); node.textContent = '✓'; label.className = 'step-label done'; }
+    else if (i === n) { node.classList.add('active'); node.classList.remove('done'); node.textContent = i; label.className = 'step-label active'; }
+    else        { node.classList.remove('active','done'); node.textContent = i; label.className = 'step-label'; }
+    if (i < 4) {
+      const line = document.getElementById('sl' + i);
+      line.classList.toggle('done', i < n);
+    }
+  });
+  currentStep = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── STEP 1 ───────────────────────────────────────────────────────────
+document.getElementById('next1').addEventListener('click', () => {
+  const name = document.getElementById('bizName').value.trim();
+  const ind  = document.getElementById('bizIndustry').value;
+  if (!name) { document.getElementById('step1Err').textContent = 'Business name is required.'; return; }
+  if (!ind)  { document.getElementById('step1Err').textContent = 'Please select your industry.'; return; }
+  document.getElementById('step1Err').textContent = '';
+  updateGreetingPlaceholder();
+  showStep(2);
+});
+
+function updateGreetingPlaceholder() {
+  const name = document.getElementById('bizName').value.trim() || 'your business';
+  const el = document.getElementById('zoyaGreeting');
+  if (!el.value) el.placeholder = `"Hello! Thank you for calling ${name}. How can I help you today?"`;
+}
+document.getElementById('bizName').addEventListener('input', updateGreetingPlaceholder);
+
+// ── STEP 2 ───────────────────────────────────────────────────────────
+document.getElementById('back2').addEventListener('click', () => showStep(1));
+document.getElementById('next2').addEventListener('click', () => showStep(3));
+
+function toggleTask(el) {
+  el.classList.toggle('checked');
+  const task = el.dataset.task;
+  if (task === 'answer_faqs') {
+    document.getElementById('faqSection').style.display = el.classList.contains('checked') ? 'block' : 'none';
+  }
+}
+
+document.getElementById('addFaqBtn').addEventListener('click', () => {
+  const rows = document.getElementById('faqRows');
+  if (rows.children.length >= 5) return;
+  const row = document.createElement('div');
+  row.className = 'faq-row';
+  row.innerHTML = `<input class="f-input" type="text" placeholder="Question"><input class="f-input" type="text" placeholder="Answer">`;
+  rows.appendChild(row);
+});
+
+// ── STEP 3 ───────────────────────────────────────────────────────────
+document.getElementById('back3').addEventListener('click', () => showStep(2));
+
+function selectPhoneOption(type) {
+  document.getElementById('opt-forward').classList.toggle('selected', type === 'forward');
+  document.getElementById('opt-new').classList.toggle('selected', type === 'new');
+}
+
+function copyNumber(e) {
+  e.stopPropagation();
+  const num = document.getElementById('zoyaNumber').textContent;
+  navigator.clipboard.writeText(num.replace(/\s|—/g,''));
+  const btn = e.target;
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 2000);
+}
+
+document.getElementById('next3').addEventListener('click', async () => {
+  const btn = document.getElementById('next3');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    // Collect all data
+    const bizName    = document.getElementById('bizName').value.trim();
+    const industry   = document.getElementById('bizIndustry').value;
+    const hoursOpen  = document.getElementById('hoursOpen').value;
+    const hoursClose = document.getElementById('hoursClose').value;
+    const days       = [...document.querySelectorAll('input[name="day"]:checked')].map(d => d.value);
+    const address    = document.getElementById('bizAddress').value.trim();
+    const greeting   = document.getElementById('zoyaGreeting').value.trim();
+    const tasks      = [...document.querySelectorAll('.task-item.checked')].map(t => t.dataset.task);
+    const phoneOpt   = document.querySelector('.phone-option.selected')?.id === 'opt-forward' ? 'forward' : 'new';
+    const existPhone = document.getElementById('existingPhone').value.trim();
+    const newCountry = document.getElementById('newNumberCountry').value;
+
+    // Collect FAQs
+    const faqs = [];
+    document.querySelectorAll('#faqRows .faq-row').forEach(row => {
+      const [q, a] = row.querySelectorAll('input');
+      if (q.value.trim()) faqs.push({ q: q.value.trim(), a: a.value.trim() });
+    });
+
+    const { error } = await _sb.auth.updateUser({
+      data: {
+        onboarding_complete: true,
+        business_name:       bizName,
+        industry:            industry,
+        business_hours_open: hoursOpen,
+        business_hours_close: hoursClose,
+        business_days:       days,
+        business_address:    address || null,
+        zoya_greeting:       greeting || null,
+        zoya_tasks:          tasks,
+        zoya_faqs:           faqs.length ? faqs : null,
+        phone_setup_type:    phoneOpt,
+        existing_phone:      phoneOpt === 'forward' ? existPhone : null,
+        new_number_country:  phoneOpt === 'new' ? newCountry : null,
+      }
+    });
+
+    if (error) throw error;
+
+    // Build summary pills
+    const pills = document.getElementById('summaryPills');
+    [
+      bizName,
+      industry.replace(/_/g,' '),
+      `${hoursOpen} – ${hoursClose}`,
+      tasks.length + ' tasks enabled',
+      phoneOpt === 'forward' ? 'Call forwarding' : 'New number'
+    ].forEach(t => {
+      pills.innerHTML += `<div class="sum-pill"><div class="dot"></div>${t}</div>`;
+    });
+
+    showStep(4);
+  } catch (err) {
+    alert('Something went wrong: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Next <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>';
+  }
+});
+
+// ── STEP 4 ───────────────────────────────────────────────────────────
+document.getElementById('goDashboard').addEventListener('click', () => {
+  window.location.href = 'dashboard.html';
+});
+</script>
+</body>
+</html>

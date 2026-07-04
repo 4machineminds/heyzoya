@@ -340,9 +340,13 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnaWN6dWt1Y2l2aWl2aHdqYnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MjEwODksImV4cCI6MjA5ODM5NzA4OX0.UCv6mFXST0jkt_180Bz0mskJc1anX_-5spcrXkVUGgE'
   );
 
-  // Redirect if already logged in (only if session is truly valid)
+  // Redirect if already logged in
   _supabase.auth.getSession().then(({ data: { session }, error }) => {
-    if (session && !error) window.location.replace('dashboard.html');
+    if (session && !error) {
+      const meta = session.user?.user_metadata || {};
+      const needsOnboarding = !meta.onboarding_complete;
+      window.location.replace(needsOnboarding ? 'onboarding.html' : 'dashboard.html');
+    }
   });
 
   // Password visibility toggle
@@ -368,7 +372,7 @@
     btn.textContent = 'Signing in…';
     msg.textContent = '';
 
-    const { error } = await _supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       msg.style.color = '#f87171';
@@ -378,7 +382,9 @@
       btn.disabled = false;
       btn.textContent = 'Sign in';
     } else {
-      window.location.replace('dashboard.html');
+      const meta = data.user?.user_metadata || {};
+      const needsOnboarding = !meta.onboarding_complete;
+      window.location.replace(needsOnboarding ? 'onboarding.html' : 'dashboard.html');
     }
   });
 </script>
