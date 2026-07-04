@@ -263,14 +263,14 @@
 
       if (res.ok) {
         msg.style.color = '#a8e6b8';
-        msg.textContent = '✅ Message sent! We\'ll be in touch within 24 hours.';
+        msg.textContent = 'Message sent! We\'ll be in touch within 24 hours.';
         form.reset();
       } else {
         throw new Error('Server error');
       }
     } catch (err) {
       msg.style.color = '#f2b9b8';
-      msg.textContent = '❌ Something went wrong. Please try again.';
+      msg.textContent = 'Something went wrong. Please try again.';
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send Message';

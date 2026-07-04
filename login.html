@@ -376,7 +376,7 @@
 
     if (error) {
       msg.style.color = '#f87171';
-      msg.textContent = '❌ ' + (error.message === 'Invalid login credentials'
+      msg.textContent = (error.message === 'Invalid login credentials'
         ? 'Invalid email or password.'
         : error.message);
       btn.disabled = false;
