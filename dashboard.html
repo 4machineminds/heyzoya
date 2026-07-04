@@ -624,7 +624,9 @@
       window.location.replace('login.html');
       return;
     }
-    currentUser = session.user;
+    // Always fetch fresh user data so onboarding/profile updates are reflected immediately
+    const { data: { user: freshUser } } = await _supabase.auth.getUser();
+    currentUser = freshUser || session.user;
 
     // ── POPULATE USER ──
     const meta    = currentUser.user_metadata || {};
