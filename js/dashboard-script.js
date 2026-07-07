@@ -340,6 +340,67 @@ async function updateLeadStatus(id, status) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// CALLS SECTION — real data from Supabase
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadCalls(userId) {
+  const { data: calls, error } = await _supabase
+    .from('calls')
+    .select('*, leads(name, phone)')
+    .eq('user_id', userId)
+    .order('started_at', { ascending: false })
+    .limit(50);
+
+  const container = document.getElementById('callsContainer');
+  if (!container) return;
+
+  if (error || !calls || calls.length === 0) {
+    container.innerHTML = `<div class="card"><p style="color:var(--muted);font-size:14px;padding:32px 0;text-align:center">No calls yet — they'll appear here after Zoya handles her first call.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="appt-table" id="callsTable">
+        <thead><tr>
+          <th>Caller</th>
+          <th>Duration</th>
+          <th>Status</th>
+          <th>Summary</th>
+          <th>Recording</th>
+          <th>Date</th>
+        </tr></thead>
+        <tbody>${calls.map(c => {
+          const lead = Array.isArray(c.leads) ? c.leads[0] : c.leads;
+          const callerName  = lead?.name  || '—';
+          const callerPhone = lead?.phone || c.caller_number || '—';
+          const statusBadge = c.status === 'ended'
+            ? 'badge-confirmed' : c.status === 'in-progress'
+            ? 'badge-pending'   : 'badge-cancelled';
+          const summary = c.summary
+            ? `<span title="${c.summary.replace(/"/g,'&quot;')}" style="display:block;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted2);font-size:12px">${c.summary}</span>`
+            : '<span style="color:var(--muted);font-size:12px">—</span>';
+          const recording = c.recording_url
+            ? `<a href="${c.recording_url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;color:var(--accent2);font-size:12px;font-weight:600;text-decoration:none;background:rgba(247,217,161,0.08);border:1px solid rgba(247,217,161,0.18);border-radius:6px;padding:4px 10px">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play
+               </a>`
+            : '<span style="color:var(--muted);font-size:12px">—</span>';
+          return `<tr>
+            <td>
+              <div class="appt-name">${callerName}</div>
+              <div class="appt-detail">${callerPhone}</div>
+            </td>
+            <td style="font-weight:600;color:#fff">${fmtDuration(c.duration_seconds)}</td>
+            <td><span class="badge ${statusBadge}">${c.status || '—'}</span></td>
+            <td>${summary}</td>
+            <td>${recording}</td>
+            <td style="color:var(--muted);font-size:13px;white-space:nowrap">${fmtDate(c.started_at)}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // USAGE — load from Supabase for account section
 // ─────────────────────────────────────────────────────────────────────────────
 async function loadUsage(userId) {
@@ -403,6 +464,7 @@ window.dashboardBoot = async function(userId) {
     initOverviewCharts(userId),
     loadAppointments(userId),
     loadLeads(userId),
+    loadCalls(userId),
     loadUsage(userId),
   ]);
 };
