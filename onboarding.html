@@ -463,8 +463,8 @@
     <div class="card-body" style="padding:40px 36px">
       <div class="success-wrap">
         <div class="success-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-        <h2>Zoya is almost ready!</h2>
-        <p>Your setup is complete. Our team will activate your Zoya agent and contact you within <strong style="color:var(--accent2)">24 hours</strong>.</p>
+        <h2>Zoya is being set up!</h2>
+        <p>Your business profile has been saved and Zoya is being configured with your exact details. Our team will assign your phone number within <strong style="color:var(--accent2)">24 hours</strong>.</p>
         <div class="summary-pills" id="summaryPills"></div>
         <button class="btn-dashboard" id="goDashboard">Go to Dashboard →</button>
       </div>
@@ -625,6 +625,27 @@ document.getElementById('next3').addEventListener('click', async () => {
     });
 
     if (error) throw error;
+
+    // ── CREATE ZOYA ASSISTANT immediately with fresh business details ──
+    try {
+      const { data: { session } } = await _sb.auth.getSession();
+      const resp = await fetch(
+        'https://tgiczukuciviivhwjbqu.supabase.co/functions/v1/create-assistant',
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      const result = await resp.json();
+      if (!resp.ok) console.warn('Assistant creation issue:', result);
+      else console.log('Zoya assistant ready:', result.assistant_id);
+    } catch (assistantErr) {
+      // Non-blocking — admin can re-trigger if needed
+      console.warn('Could not create assistant automatically:', assistantErr);
+    }
 
     // Build summary pills
     const pills = document.getElementById('summaryPills');
