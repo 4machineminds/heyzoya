@@ -23,10 +23,11 @@
       --text: #dde8f5;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { overflow-x: hidden; max-width: 100%; }
     body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
     /* LAYOUT */
-    .dashboard-layout { display: flex; min-height: 100vh; }
+    .dashboard-layout { display: flex; min-height: 100vh; width: 100%; overflow-x: hidden; }
 
     /* SIDEBAR */
     .sidebar {
@@ -62,7 +63,7 @@
     .btn-logout:hover { background: rgba(248,113,113,0.15); }
 
     /* MAIN */
-    .main-content { margin-left: 240px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.3s; }
+    .main-content { margin-left: 240px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.3s; min-width: 0; overflow-x: hidden; }
     .topbar { position: sticky; top: 0; z-index: 100; background: rgba(6,8,15,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 0 28px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
     .topbar-left { display: flex; align-items: center; gap: 14px; }
     .menu-toggle { display: none; background: none; border: 1px solid rgba(255,255,255,0.08); color: var(--muted2); font-size: 18px; padding: 6px 10px; border-radius: 8px; cursor: pointer; }
@@ -70,7 +71,7 @@
     .topbar-right { display: flex; align-items: center; gap: 10px; }
     .topbar-logo { height: 32px; }
     .topbar-greeting { font-size: 14px; color: var(--muted); }
-    .content { padding: 28px; flex: 1; }
+    .content { padding: 28px; flex: 1; min-width: 0; max-width: 100%; }
 
     /* SECTIONS */
     section { display: none; animation: fadeIn 0.3s ease; }
@@ -85,17 +86,57 @@
     .card-sm { background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px; }
 
     /* STAT CARDS */
-    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; padding: 20px; }
-    .stat-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
-    .stat-value { font-size: 32px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 6px; }
-    .stat-change { font-size: 12px; display: flex; align-items: center; gap: 4px; }
-    .stat-change.up { color: var(--success); }
-    .stat-change.down { color: var(--danger); }
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+    .stat-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+    .stat-card-top { display: flex; align-items: center; justify-content: space-between; }
+    .stat-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .stat-icon.gold { background: rgba(247,217,161,0.12); color: var(--accent2); }
+    .stat-icon.rose { background: rgba(242,185,184,0.12); color: var(--accent1); }
+    .stat-icon.blue { background: rgba(100,160,255,0.10); color: #7ab4ff; }
+    .stat-icon.green { background: rgba(78,245,138,0.10); color: var(--success); }
+    .stat-menu { color: var(--muted); font-size: 18px; cursor: pointer; line-height: 1; letter-spacing: 1px; }
+    .stat-label { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .stat-value { font-size: 28px; font-weight: 700; color: #fff; line-height: 1; }
+    .stat-footer { display: flex; align-items: center; gap: 6px; }
+    .stat-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+    .stat-badge.up { background: rgba(78,245,138,0.12); color: var(--success); }
+    .stat-badge.down { background: rgba(248,113,113,0.12); color: var(--danger); }
+    .stat-period { font-size: 11px; color: var(--muted); }
+
+    /* OVERVIEW GRID ROWS */
+    .overview-row { display: grid; gap: 16px; margin-bottom: 20px; }
+    .overview-row.cols-2 { grid-template-columns: 1fr 1.6fr; }
+    .overview-row.cols-2b { grid-template-columns: 1.6fr 1fr; }
 
     /* CHART */
-    .chart-card { margin-bottom: 24px; }
-    .chart-title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 16px; }
+    .chart-card { }
+    .chart-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+    .chart-title { font-size: 14px; font-weight: 600; color: var(--muted2); }
+    .chart-value { font-size: 26px; font-weight: 700; color: #fff; margin-top: 2px; }
+    .chart-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted2); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* DONUT WRAP */
+    .donut-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 180px; position: relative; }
+    .donut-center { position: absolute; text-align: center; }
+    .donut-center-val { font-size: 26px; font-weight: 700; color: #fff; }
+    .donut-center-lbl { font-size: 11px; color: var(--muted); }
+    .donut-stats { width: 100%; margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+    .donut-stat-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+    .donut-stat-label { display: flex; align-items: center; gap: 8px; color: var(--muted2); }
+    .donut-stat-val { font-weight: 600; color: #fff; }
+
+    /* MINI TABLE */
+    .mini-table { width: 100%; border-collapse: collapse; }
+    .mini-table th { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .mini-table td { padding: 11px 12px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; color: var(--text); }
+    .mini-table tr:last-child td { border-bottom: none; }
+    .mini-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .mini-avatar { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, rgba(242,185,184,0.3), rgba(247,217,161,0.2)); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--accent2); }
+    .view-all-row { padding: 10px 12px; text-align: center; }
+    .view-all-btn { background: none; border: none; color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: color 0.2s; }
+    .view-all-btn:hover { color: var(--accent2); }
 
     /* ── APPOINTMENTS SECTION ── */
     .appt-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
@@ -193,26 +234,124 @@
     .toast { position: fixed; bottom: 24px; right: 24px; background: #0d1120; border: 1px solid rgba(78,245,138,0.2); border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; gap: 10px; z-index: 9999; font-size: 14px; color: var(--success); box-shadow: 0 12px 40px rgba(0,0,0,0.6); transform: translateY(20px); opacity: 0; transition: all 0.3s; pointer-events: none; }
     .toast.show { transform: translateY(0); opacity: 1; }
 
-    /* MOBILE */
+    /* MOBILE BOTTOM NAV */
+    .mobile-nav {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+      background: rgba(10,12,22,0.97); backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+    }
+    .mobile-nav-inner { display: flex; justify-content: space-around; align-items: center; }
+    .mobile-nav-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      background: none; border: none; color: var(--muted); font-size: 10px;
+      font-weight: 600; padding: 6px 16px; border-radius: 10px; cursor: pointer;
+      transition: color 0.2s; font-family: 'DM Sans', sans-serif;
+    }
+    .mobile-nav-btn svg { display: block; margin-bottom: 1px; }
+    .mobile-nav-btn.active { color: var(--accent2); }
+
+    /* SIDEBAR OVERLAY */
+    .sidebar-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      z-index: 199; backdrop-filter: blur(2px);
+    }
+    .sidebar-overlay.visible { display: block; }
+
+    @media (max-width: 1100px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .overview-row.cols-2, .overview-row.cols-2b { grid-template-columns: 1fr; }
+    }
+
+    /* TABLET */
     @media (max-width: 900px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: translateX(0); }
       .main-content { margin-left: 0; }
       .menu-toggle { display: block; }
       .stats-row { grid-template-columns: 1fr 1fr; }
+      .overview-row.cols-2, .overview-row.cols-2b { grid-template-columns: 1fr; }
       .account-grid { grid-template-columns: 1fr; }
       .acct-form-grid { grid-template-columns: 1fr; }
     }
+
+    /* MOBILE */
     @media (max-width: 600px) {
-      .stats-row { grid-template-columns: 1fr; }
-      .content { padding: 16px; }
+      .mobile-nav { display: block; }
+      .main-content { padding-bottom: 70px; }
+      .content { padding: 14px; }
+      .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+      .stat-card { padding: 14px; }
+      .stat-value { font-size: 22px; }
+      .section-header h2 { font-size: 22px; }
+      .overview-row.cols-2, .overview-row.cols-2b { grid-template-columns: 1fr; }
+      .chart-value { font-size: 22px; }
+
+      /* Topbar compact */
+      .topbar { padding: 0 14px; height: 56px; max-width: 100%; }
+      .topbar-greeting { display: none; }
+
+      /* Prevent canvas overflow */
+      canvas { max-width: 100% !important; }
+
+      /* Table card wrapper: allow horizontal scroll as fallback */
+      .card[style*="overflow:hidden"], .card[style*="overflow: hidden"] { overflow-x: auto !important; }
+
+      /* All cards, sections, inputs constrained */
+      .card, .card-sm, section, .form-grid, .acct-form-grid { max-width: 100%; }
+      input, select, textarea { max-width: 100%; }
+
+      /* Appointment controls stack */
+      .appt-controls { flex-direction: column; align-items: stretch; }
+      .appt-search { width: 100%; }
+      .btn-add { justify-content: center; }
+
+      /* Appointment table → cards */
+      .appt-table { display: block; }
       .appt-table thead { display: none; }
-      .appt-table tr { display: flex; flex-direction: column; border-bottom: 1px solid rgba(255,255,255,0.06); padding: 12px 0; }
-      .appt-table td { padding: 4px 0; border: none; }
+      .appt-table tbody { display: flex; flex-direction: column; gap: 10px; }
+      .appt-table tr { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; gap: 6px 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px; border-bottom: none; }
+      .appt-table tr:hover td { background: none; }
+      .appt-table td { padding: 0; border: none; }
+      /* Col 1 row 1: client name */
+      .appt-table td:nth-child(1) { grid-column: 1; grid-row: 1; }
+      /* Col 2 row 1: date */
+      .appt-table td:nth-child(2) { grid-column: 1; grid-row: 2; }
+      /* Col 3 type: hide on mobile (shown in name cell via data) */
+      .appt-table td:nth-child(3) { grid-column: 2; grid-row: 2; color: var(--muted); font-size: 12px; text-align: right; }
+      /* Col 4 status: top right */
+      .appt-table td:nth-child(4) { grid-column: 2; grid-row: 1; text-align: right; }
+      /* Col 5 actions: full width bottom */
+      .appt-table td:nth-child(5) { grid-column: 1 / -1; grid-row: 3; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
+      .appt-actions { justify-content: flex-start; }
+
+      /* Account tabs: scroll horizontally */
+      .account-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; padding-bottom: 1px; }
+      .account-tabs::-webkit-scrollbar { display: none; }
+      .acct-tab { white-space: nowrap; flex-shrink: 0; padding: 10px 12px; font-size: 13px; }
+
+      /* Modal: full screen on mobile */
+      .modal-overlay { align-items: flex-end; }
+      .modal { width: 100%; max-width: 100%; border-radius: 20px 20px 0 0; max-height: 92vh; overflow-y: auto; }
+
+      /* Billing grid 1-col on mobile */
+      .acct-form-grid { grid-template-columns: 1fr; }
+
+      /* Toast at bottom above nav */
+      .toast { bottom: 80px; right: 14px; left: 14px; justify-content: center; }
+    }
+
+    @media (max-width: 380px) {
+      .stats-row { grid-template-columns: 1fr; }
+      .stat-value { font-size: 28px; }
     }
   </style>
 </head>
 <body>
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
 <div class="dashboard-layout">
 
   <!-- SIDEBAR -->
@@ -267,31 +406,157 @@
 
       <!-- ─── OVERVIEW ─── -->
       <section id="overview" class="active">
-        <div class="section-header">
-          <h2>Overview</h2>
-          <p>Your business performance at a glance</p>
-        </div>
+
+        <!-- 4 STAT CARDS -->
         <div class="stats-row">
           <div class="stat-card">
-            <div class="stat-label">Total Leads</div>
-            <div class="stat-value" id="statLeads">0</div>
-            <div class="stat-change up">↑ 12% vs last week</div>
+            <div class="stat-card-top">
+              <div class="stat-icon gold">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              </div>
+              <span class="stat-menu">···</span>
+            </div>
+            <div>
+              <div class="stat-label">Total Leads</div>
+              <div class="stat-value" id="statLeads">24</div>
+            </div>
+            <div class="stat-footer">
+              <span class="stat-badge up">↑ 12%</span>
+              <span class="stat-period">vs last week</span>
+            </div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Appointments</div>
-            <div class="stat-value" id="statAppts">0</div>
-            <div class="stat-change up">↑ 8% vs last week</div>
+            <div class="stat-card-top">
+              <div class="stat-icon rose">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <span class="stat-menu">···</span>
+            </div>
+            <div>
+              <div class="stat-label">Appointments</div>
+              <div class="stat-value" id="statAppts">7</div>
+            </div>
+            <div class="stat-footer">
+              <span class="stat-badge up">↑ 8%</span>
+              <span class="stat-period">vs last week</span>
+            </div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Active Leads</div>
-            <div class="stat-value" id="statActive">0</div>
-            <div class="stat-change down">↓ 3% inactive</div>
+            <div class="stat-card-top">
+              <div class="stat-icon blue">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <span class="stat-menu">···</span>
+            </div>
+            <div>
+              <div class="stat-label">Active Leads</div>
+              <div class="stat-value" id="statActive">18</div>
+            </div>
+            <div class="stat-footer">
+              <span class="stat-badge down">↓ 3%</span>
+              <span class="stat-period">vs last week</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div class="stat-icon green">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+              </div>
+              <span class="stat-menu">···</span>
+            </div>
+            <div>
+              <div class="stat-label">Avg. Response Rate</div>
+              <div class="stat-value">94%</div>
+            </div>
+            <div class="stat-footer">
+              <span class="stat-badge up">↑ 5%</span>
+              <span class="stat-period">vs last month</span>
+            </div>
           </div>
         </div>
-        <div class="card chart-card">
-          <div class="chart-title">Leads & Appointments — Last 7 Days</div>
-          <canvas id="leadsChart" style="max-height:280px"></canvas>
+
+        <!-- ROW 2: Call Sources Donut + Leads Bar Chart -->
+        <div class="overview-row cols-2">
+          <!-- Donut: Call Sources -->
+          <div class="card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Call Sources</div>
+                <div class="chart-value">150</div>
+              </div>
+            </div>
+            <div class="donut-wrap">
+              <canvas id="donutChart" style="max-width:180px;max-height:180px"></canvas>
+              <div class="donut-center">
+                <div class="donut-center-val">150</div>
+                <div class="donut-center-lbl">Total Calls</div>
+              </div>
+            </div>
+            <div class="donut-stats">
+              <div class="donut-stat-row">
+                <span class="donut-stat-label"><span class="legend-dot" style="background:#f7d9a1"></span>Organic</span>
+                <span class="donut-stat-val">80%</span>
+              </div>
+              <div class="donut-stat-row">
+                <span class="donut-stat-label"><span class="legend-dot" style="background:#f2b9b8"></span>Referral</span>
+                <span class="donut-stat-val">60%</span>
+              </div>
+              <div class="donut-stat-row">
+                <span class="donut-stat-label"><span class="legend-dot" style="background:#7ab4ff"></span>Direct</span>
+                <span class="donut-stat-val">50%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bar: Leads by month -->
+          <div class="card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Leads by Week</div>
+                <div class="chart-value">$2.4K <span style="font-size:13px;font-weight:400;color:var(--muted)">estimated value</span></div>
+              </div>
+              <div class="chart-legend">
+                <span class="legend-item"><span class="legend-dot" style="background:#f7d9a1"></span>Leads</span>
+                <span class="legend-item"><span class="legend-dot" style="background:#f2b9b8"></span>Appointments</span>
+              </div>
+            </div>
+            <canvas id="barChart" style="max-height:220px"></canvas>
+          </div>
         </div>
+
+        <!-- ROW 3: Recent Appointments + Activity Line Chart -->
+        <div class="overview-row cols-2b">
+          <!-- Recent appointments mini table -->
+          <div class="card" style="padding:0;overflow:hidden">
+            <div style="padding:16px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05)">
+              <span style="font-size:14px;font-weight:600;color:#fff">Recent Appointments</span>
+              <button class="view-all-btn" onclick="document.querySelector('[data-section=appointments]').click()">View all →</button>
+            </div>
+            <table class="mini-table">
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="overviewApptRows"></tbody>
+            </table>
+          </div>
+
+          <!-- Line: Activity over time -->
+          <div class="card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title">Call Activity</div>
+                <div class="chart-value">257 <span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(78,245,138,0.12);color:var(--success);vertical-align:middle">↑ 6.9%</span></div>
+              </div>
+            </div>
+            <canvas id="leadsChart" style="max-height:160px"></canvas>
+          </div>
+        </div>
+
       </section>
 
       <!-- ─── LEADS ─── -->
@@ -321,7 +586,7 @@
           <button class="filter-chip" data-filter="pending">Pending</button>
           <button class="filter-chip" data-filter="cancelled">Cancelled</button>
         </div>
-        <div class="card" style="padding:0;overflow:hidden">
+        <div class="card" style="padding:0;overflow-x:auto;overflow-y:hidden">
           <table class="appt-table" id="apptTable">
             <thead>
               <tr>
@@ -597,6 +862,28 @@
   </div>
 </div>
 
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-inner">
+    <button class="mobile-nav-btn active" data-section="overview">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+      Overview
+    </button>
+    <button class="mobile-nav-btn" data-section="leads">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      Leads
+    </button>
+    <button class="mobile-nav-btn" data-section="appointments">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Appts
+    </button>
+    <button class="mobile-nav-btn" data-section="account">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Account
+    </button>
+  </div>
+</nav>
+
 <!-- TOAST -->
 <div class="toast" id="toast">✓ <span id="toastMsg">Saved!</span></div>
 
@@ -682,8 +969,29 @@
   });
 
   // ── SIDEBAR ──
-  function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
-  function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
+  function toggleSidebar() {
+    const open = document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('visible', open);
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('visible');
+  }
+
+  // ── MOBILE BOTTOM NAV ──
+  document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sec = btn.dataset.section;
+      // sync sidebar nav active state
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.section === sec));
+      document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.section === sec));
+      sections.forEach(s => {
+        const el = document.getElementById(s);
+        if (el) el.classList.toggle('active', s === sec);
+      });
+      document.getElementById('pageTitle').textContent = pageTitles[sec] || sec;
+    });
+  });
 
   // ── LOGOUT ──
   document.getElementById('logoutBtn').addEventListener('click', async () => {
