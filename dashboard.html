@@ -564,10 +564,10 @@
       <section id="leads">
         <div class="section-header">
           <h2>Leads</h2>
-          <p>Manage and track your incoming leads</p>
+          <p>Every caller Zoya captures automatically appears here</p>
         </div>
-        <div class="card">
-          <p style="color:var(--muted);font-size:14px;padding:24px 0;text-align:center">Lead management is coming soon. Your leads from HeyZoya calls will appear here.</p>
+        <div id="leadsContainer">
+          <div class="card"><p style="color:var(--muted);font-size:14px;padding:24px 0;text-align:center">Loading leads…</p></div>
         </div>
       </section>
 
@@ -889,7 +889,7 @@
 <div class="toast" id="toast">✓ <span id="toastMsg">Saved!</span></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/dashboard-script.js" defer></script>
+<script src="js/dashboard-script.js"></script>
 <script>
   const { createClient } = supabase;
   const _supabase = createClient(
@@ -897,76 +897,33 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnaWN6dWt1Y2l2aWl2aHdqYnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MjEwODksImV4cCI6MjA5ODM5NzA4OX0.UCv6mFXST0jkt_180Bz0mskJc1anX_-5spcrXkVUGgE'
   );
 
-  // ── AUTH CHECK ──
-  let currentUser = null;
-  let firstName = '', lastName = '', displayName = '', bizName = '', phone = '', industry = '', website = '', bizDesc = '';
-
+  // ── HELPERS ──
   function getInitials(name) {
-    return (name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+    return (name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   }
-
-  (async () => {
-    const { data: { session } } = await _supabase.auth.getSession();
-    if (!session) {
-      await _supabase.auth.signOut();
-      window.location.replace('login.html');
-      return;
-    }
-    // Always fetch fresh user data so onboarding/profile updates are reflected immediately
-    const { data: { user: freshUser } } = await _supabase.auth.getUser();
-    currentUser = freshUser || session.user;
-
-    // ── POPULATE USER ──
-    const meta    = currentUser.user_metadata || {};
-    firstName     = meta.first_name || '';
-    lastName      = meta.last_name  || '';
-    displayName   = meta.full_name  || [firstName, lastName].filter(Boolean).join(' ') || meta.name || currentUser.email.split('@')[0];
-    bizName       = meta.business_name || '';
-    phone         = meta.phone || '';
-    industry      = meta.industry || '';
-    website       = meta.website || '';
-    bizDesc       = meta.business_description || '';
-    const loggedInEmail = currentUser.email;
-
-    document.getElementById('sidebarUserName').textContent    = displayName;
-    document.getElementById('sidebarBizName').textContent     = bizName || 'My Business';
-    document.getElementById('userAvatarInitial').textContent  = getInitials(displayName);
-    document.getElementById('topGreeting').textContent        = `Welcome, ${displayName.split(' ')[0]}`;
-    document.getElementById('acctAvatarInitial').textContent  = getInitials(displayName);
-    document.getElementById('acctName').textContent           = displayName;
-    document.getElementById('acctEmail').textContent          = loggedInEmail;
-    document.getElementById('acctEmailInput').value           = loggedInEmail;
-    document.getElementById('acctFirstName').value            = firstName || displayName.split(' ')[0] || '';
-    document.getElementById('acctLastName').value             = lastName  || displayName.split(' ').slice(1).join(' ') || '';
-    document.getElementById('acctPhone').value                = phone;
-    document.getElementById('acctIndustry').value             = industry;
-    document.getElementById('acctBizName').value              = bizName;
-    document.getElementById('acctWebsite').value              = website;
-    document.getElementById('acctBizDesc').value              = bizDesc;
-  })();
-
-  // stats
-  const appts = JSON.parse(localStorage.getItem('hzAppts') || '[]');
-  document.getElementById('statLeads').textContent = '24';
-  document.getElementById('statAppts').textContent = appts.length || '7';
-  document.getElementById('statActive').textContent = '18';
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+  window.showToast = showToast;
 
   // ── NAVIGATION ──
-  const sections = ['overview', 'leads', 'appointments', 'account'];
+  const sections   = ['overview', 'leads', 'appointments', 'account'];
   const pageTitles = { overview: 'Overview', leads: 'Leads', appointments: 'Appointments', account: 'Account Settings' };
 
+  function switchSection(sec) {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.section === sec));
+    document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.section === sec));
+    sections.forEach(s => { const el = document.getElementById(s); if (el) el.classList.toggle('active', s === sec); });
+    document.getElementById('pageTitle').textContent = pageTitles[sec] || sec;
+  }
   document.querySelectorAll('.nav-item').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const sec = btn.dataset.section;
-      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      sections.forEach(s => {
-        const el = document.getElementById(s);
-        if (el) el.classList.toggle('active', s === sec);
-      });
-      document.getElementById('pageTitle').textContent = pageTitles[sec] || sec;
-      if (window.innerWidth < 900) closeSidebar();
-    });
+    btn.addEventListener('click', () => { switchSection(btn.dataset.section); if (window.innerWidth < 900) closeSidebar(); });
+  });
+  document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchSection(btn.dataset.section));
   });
 
   // ── SIDEBAR ──
@@ -979,150 +936,6 @@
     document.getElementById('sidebarOverlay').classList.remove('visible');
   }
 
-  // ── MOBILE BOTTOM NAV ──
-  document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const sec = btn.dataset.section;
-      // sync sidebar nav active state
-      document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.section === sec));
-      document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.section === sec));
-      sections.forEach(s => {
-        const el = document.getElementById(s);
-        if (el) el.classList.toggle('active', s === sec);
-      });
-      document.getElementById('pageTitle').textContent = pageTitles[sec] || sec;
-    });
-  });
-
-  // ── LOGOUT ──
-  document.getElementById('logoutBtn').addEventListener('click', async () => {
-    await _supabase.auth.signOut();
-    window.location.href = 'login.html';
-  });
-
-  // ── APPOINTMENTS ──
-  let editingApptId = null;
-  let allAppts = JSON.parse(localStorage.getItem('hzAppts') || '[]');
-
-  // Seed sample data if empty
-  if (allAppts.length === 0) {
-    allAppts = [
-      { id: Date.now()+1, client: 'Sarah Johnson', phone: '+1 555 012 3456', date: '2025-11-25', time: '10:00', type: 'Consultation', status: 'confirmed', notes: 'Interested in HVAC service' },
-      { id: Date.now()+2, client: 'Michael Torres', phone: '+1 555 987 6543', date: '2025-11-26', time: '14:30', type: 'Demo', status: 'pending', notes: 'Referred by John' },
-      { id: Date.now()+3, client: 'Aisha Patel', phone: '+1 555 246 8101', date: '2025-11-28', time: '09:00', type: 'Follow-up', status: 'confirmed', notes: '' },
-      { id: Date.now()+4, client: 'James Nguyen', phone: '+1 555 135 7924', date: '2025-11-20', time: '11:00', type: 'Consultation', status: 'cancelled', notes: 'Rescheduling needed' },
-    ];
-    localStorage.setItem('hzAppts', JSON.stringify(allAppts));
-  }
-
-  let apptFilter = 'all';
-  let apptSearch = '';
-
-  function renderAppts() {
-    const tbody = document.getElementById('apptBody');
-    let list = allAppts;
-    if (apptFilter !== 'all') list = list.filter(a => a.status === apptFilter);
-    if (apptSearch) list = list.filter(a => a.client.toLowerCase().includes(apptSearch.toLowerCase()) || a.type.toLowerCase().includes(apptSearch.toLowerCase()));
-
-    if (list.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div>No appointments found</div></div></td></tr>`;
-      return;
-    }
-    tbody.innerHTML = list.map(a => `
-      <tr>
-        <td><div class="appt-name">${a.client}</div><div class="appt-detail">${a.phone || '—'}</div></td>
-        <td><div>${formatDate(a.date)}</div><div class="appt-detail">${a.time}</div></td>
-        <td>${a.type}</td>
-        <td><span class="badge badge-${a.status}">${a.status}</span></td>
-        <td><div class="appt-actions">
-          <button class="btn-icon" onclick="editAppt(${a.id})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
-          <button class="btn-icon" onclick="deleteAppt(${a.id})" style="color:var(--danger)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
-        </div></td>
-      </tr>
-    `).join('');
-  }
-
-  function formatDate(d) {
-    if (!d) return '—';
-    const dt = new Date(d + 'T00:00:00');
-    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  }
-
-  document.getElementById('apptSearch').addEventListener('input', e => { apptSearch = e.target.value; renderAppts(); });
-  document.querySelectorAll('.filter-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      apptFilter = chip.dataset.filter;
-      renderAppts();
-    });
-  });
-
-  function openApptModal(id = null) {
-    editingApptId = id;
-    document.getElementById('modalTitle').textContent = id ? 'Edit Appointment' : 'New Appointment';
-    if (id) {
-      const a = allAppts.find(x => x.id === id);
-      if (a) {
-        document.getElementById('m-client').value = a.client;
-        document.getElementById('m-phone').value = a.phone || '';
-        document.getElementById('m-date').value = a.date;
-        document.getElementById('m-time').value = a.time;
-        document.getElementById('m-type').value = a.type;
-        document.getElementById('m-status').value = a.status;
-        document.getElementById('m-notes').value = a.notes || '';
-      }
-    } else {
-      document.getElementById('m-client').value = '';
-      document.getElementById('m-phone').value = '';
-      document.getElementById('m-date').value = '';
-      document.getElementById('m-time').value = '';
-      document.getElementById('m-type').value = 'Consultation';
-      document.getElementById('m-status').value = 'confirmed';
-      document.getElementById('m-notes').value = '';
-    }
-    document.getElementById('apptModal').classList.add('open');
-  }
-
-  function closeApptModal() { document.getElementById('apptModal').classList.remove('open'); }
-
-  function saveAppointment() {
-    const entry = {
-      id: editingApptId || Date.now(),
-      client: document.getElementById('m-client').value.trim(),
-      phone: document.getElementById('m-phone').value.trim(),
-      date: document.getElementById('m-date').value,
-      time: document.getElementById('m-time').value,
-      type: document.getElementById('m-type').value,
-      status: document.getElementById('m-status').value,
-      notes: document.getElementById('m-notes').value.trim()
-    };
-    if (!entry.client || !entry.date) { alert('Client name and date are required.'); return; }
-    if (editingApptId) {
-      const idx = allAppts.findIndex(a => a.id === editingApptId);
-      if (idx > -1) allAppts[idx] = entry;
-    } else {
-      allAppts.unshift(entry);
-    }
-    localStorage.setItem('hzAppts', JSON.stringify(allAppts));
-    document.getElementById('statAppts').textContent = allAppts.length;
-    closeApptModal();
-    renderAppts();
-    showToast(editingApptId ? 'Appointment updated!' : 'Appointment added!');
-  }
-
-  function editAppt(id) { openApptModal(id); }
-
-  function deleteAppt(id) {
-    if (!confirm('Delete this appointment?')) return;
-    allAppts = allAppts.filter(a => a.id !== id);
-    localStorage.setItem('hzAppts', JSON.stringify(allAppts));
-    renderAppts();
-    showToast('Appointment deleted.');
-  }
-
-  renderAppts();
-
   // ── ACCOUNT TABS ──
   document.querySelectorAll('.acct-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -1133,7 +946,61 @@
     });
   });
 
-  // ── PROFILE SAVE ──
+  // ── MODAL CLOSE ON OVERLAY CLICK ──
+  document.getElementById('apptModal').addEventListener('click', function(e) {
+    if (e.target === this) window.closeApptModal && window.closeApptModal();
+  });
+
+  // ── LOGOUT ──
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await _supabase.auth.signOut();
+    window.location.href = 'login.html';
+  });
+
+  // ── AUTH + BOOT ──
+  let currentUser = null;
+  let firstName = '', lastName = '', displayName = '', bizName = '', phone = '', industry = '', website = '', bizDesc = '';
+
+  (async () => {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) { await _supabase.auth.signOut(); window.location.replace('login.html'); return; }
+
+    const { data: { user: freshUser } } = await _supabase.auth.getUser();
+    currentUser = freshUser || session.user;
+
+    const meta  = currentUser.user_metadata || {};
+    firstName   = meta.first_name || '';
+    lastName    = meta.last_name  || '';
+    displayName = meta.full_name  || [firstName, lastName].filter(Boolean).join(' ') || meta.name || currentUser.email.split('@')[0];
+    bizName     = meta.business_name || '';
+    phone       = meta.phone || '';
+    industry    = meta.industry || '';
+    website     = meta.website || '';
+    bizDesc     = meta.business_description || '';
+    const email = currentUser.email;
+
+    document.getElementById('sidebarUserName').textContent   = displayName;
+    document.getElementById('sidebarBizName').textContent    = bizName || 'My Business';
+    document.getElementById('userAvatarInitial').textContent = getInitials(displayName);
+    document.getElementById('topGreeting').textContent       = `Welcome, ${displayName.split(' ')[0]}`;
+    document.getElementById('acctAvatarInitial').textContent = getInitials(displayName);
+    document.getElementById('acctName').textContent          = displayName;
+    document.getElementById('acctEmail').textContent         = email;
+    document.getElementById('acctEmailInput').value          = email;
+    document.getElementById('acctFirstName').value           = firstName || displayName.split(' ')[0] || '';
+    document.getElementById('acctLastName').value            = lastName  || displayName.split(' ').slice(1).join(' ') || '';
+    document.getElementById('acctPhone').value               = phone;
+    document.getElementById('acctIndustry').value            = industry;
+    document.getElementById('acctBizName').value             = bizName;
+    document.getElementById('acctWebsite').value             = website;
+    document.getElementById('acctBizDesc').value             = bizDesc;
+
+    // Boot dashboard-script.js with real user ID
+    if (window.dashboardBoot) window.dashboardBoot(currentUser.id);
+    else window.addEventListener('dashboardReady', () => window.dashboardBoot(currentUser.id));
+  })();
+
+  // ── PROFILE SAVE / DISCARD ──
   function loadProfile() {
     document.getElementById('acctFirstName').value = firstName || displayName.split(' ')[0] || '';
     document.getElementById('acctLastName').value  = lastName  || displayName.split(' ').slice(1).join(' ') || '';
@@ -1146,50 +1013,27 @@
   }
 
   async function saveProfile() {
-    const fn       = document.getElementById('acctFirstName').value.trim();
-    const ln       = document.getElementById('acctLastName').value.trim();
-    const ph       = document.getElementById('acctPhone').value.trim();
-    const ind      = document.getElementById('acctIndustry').value;
-    const biz      = document.getElementById('acctBizName').value.trim();
-    const web      = document.getElementById('acctWebsite').value.trim();
-    const desc     = document.getElementById('acctBizDesc').value.trim();
+    const fn  = document.getElementById('acctFirstName').value.trim();
+    const ln  = document.getElementById('acctLastName').value.trim();
+    const ph  = document.getElementById('acctPhone').value.trim();
+    const ind = document.getElementById('acctIndustry').value;
+    const biz = document.getElementById('acctBizName').value.trim();
+    const web = document.getElementById('acctWebsite').value.trim();
+    const desc= document.getElementById('acctBizDesc').value.trim();
     const fullName = [fn, ln].filter(Boolean).join(' ') || fn;
 
     const { error } = await _supabase.auth.updateUser({
-      data: {
-        first_name:           fn,
-        last_name:            ln,
-        full_name:            fullName,
-        phone:                ph || null,
-        industry:             ind || null,
-        business_name:        biz || null,
-        website:              web || null,
-        business_description: desc || null,
-      }
+      data: { first_name: fn, last_name: ln, full_name: fullName, phone: ph || null, industry: ind || null, business_name: biz || null, website: web || null, business_description: desc || null }
     });
-
     if (error) { showToast('Save failed: ' + error.message); return; }
 
-    document.getElementById('sidebarUserName').textContent  = fullName;
-    document.getElementById('sidebarBizName').textContent   = biz || 'My Business';
-    document.getElementById('acctName').textContent         = fullName;
+    document.getElementById('sidebarUserName').textContent   = fullName;
+    document.getElementById('sidebarBizName').textContent    = biz || 'My Business';
+    document.getElementById('acctName').textContent          = fullName;
     document.getElementById('acctAvatarInitial').textContent = getInitials(fullName);
     document.getElementById('userAvatarInitial').textContent = getInitials(fullName);
     showToast('Profile saved successfully!');
   }
-
-  // ── TOAST ──
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    document.getElementById('toastMsg').textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-  }
-
-  // ── MODAL CLOSE ON OVERLAY ──
-  document.getElementById('apptModal').addEventListener('click', function(e) {
-    if (e.target === this) closeApptModal();
-  });
 </script>
 </body>
 </html>
