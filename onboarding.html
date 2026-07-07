@@ -66,6 +66,11 @@
   .card-body { padding: 28px 36px; }
   .card-footer { padding: 20px 36px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
+  /* ── SECTION DIVIDER ── */
+  .section-divider { display: flex; align-items: center; gap: 12px; margin: 24px 0 20px; }
+  .section-divider span { font-size: 11px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
   /* ── FORM FIELDS ── */
   .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
   .f-field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
@@ -83,8 +88,40 @@
   .f-input::placeholder, .f-textarea::placeholder { color: var(--muted); }
   .f-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237b8ba5' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 13px center; padding-right: 36px; cursor: pointer; }
   .f-select option { background: #0d0f1a; color: #fff; }
-  .f-textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+  .f-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
   .f-hint { font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+
+  /* ── WEBSITE SCAN ROW ── */
+  .scan-row { display: flex; gap: 10px; align-items: flex-end; }
+  .scan-row .f-input { flex: 1; }
+  .btn-scan {
+    flex-shrink: 0;
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 12px 18px; border-radius: 10px;
+    background: rgba(247,217,161,.1); border: 1px solid rgba(247,217,161,.25);
+    color: var(--accent2); font-size: 13px; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: all .2s; white-space: nowrap;
+  }
+  .btn-scan:hover:not(:disabled) { background: rgba(247,217,161,.18); border-color: rgba(247,217,161,.4); }
+  .btn-scan:disabled { opacity: .6; cursor: not-allowed; }
+  .scan-spin { animation: spin 1s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── SCAN RESULT BANNER ── */
+  .scan-banner {
+    display: none; align-items: center; gap: 10px;
+    background: rgba(78,245,138,.06); border: 1px solid rgba(78,245,138,.15);
+    border-radius: 10px; padding: 10px 14px; margin-top: 10px;
+  }
+  .scan-banner.visible { display: flex; }
+  .scan-banner.error { background: rgba(248,113,113,.06); border-color: rgba(248,113,113,.15); }
+  .scan-banner .sb-icon { flex-shrink: 0; }
+  .scan-banner .sb-text { font-size: 13px; line-height: 1.5; }
+  .scan-banner.visible .sb-text { color: rgba(78,245,138,.9); }
+  .scan-banner.error .sb-text { color: #f87171; }
+
+  /* ── AUTO-FILL HIGHLIGHT ── */
+  .autofilled { border-color: rgba(78,245,138,.35) !important; background: rgba(78,245,138,.04) !important; }
 
   /* ── DAYS PICKER ── */
   .days-grid { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -125,7 +162,7 @@
   .task-icon { font-size: 22px; }
 
   /* ── FAQ ROWS ── */
-  .faq-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .faq-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; align-items: start; }
   .faq-row .f-input { font-size: 13px; padding: 10px 12px; }
   .add-faq-btn {
     display: inline-flex; align-items: center; gap: 6px;
@@ -221,6 +258,8 @@
     .f-row { grid-template-columns: 1fr; }
     .faq-row { grid-template-columns: 1fr; }
     .card-header h1 { font-size: 19px; }
+    .scan-row { flex-direction: column; }
+    .btn-scan { width: 100%; justify-content: center; }
   }
 </style>
 </head>
@@ -247,7 +286,7 @@
     <div class="step-node" id="sn4">4</div>
   </div>
   <div class="progress-labels">
-    <span class="step-label active" id="sl-1">Business</span>
+    <span class="step-label active" id="sl-1">Your Info</span>
     <span class="step-label" id="sl-2">Configure Zoya</span>
     <span class="step-label" id="sl-3">Phone</span>
     <span class="step-label" id="sl-4">All Set</span>
@@ -257,14 +296,53 @@
 <!-- CARD -->
 <div class="card">
 
-  <!-- ── STEP 1: BUSINESS INFO ── -->
+  <!-- ── STEP 1: YOUR INFO + BUSINESS WEBSITE ── -->
   <div id="step1">
     <div class="card-header">
       <div class="step-badge">Step 1 of 4</div>
-      <h1>Tell us about your business</h1>
-      <p>Zoya will use this to introduce herself and handle your calls correctly.</p>
+      <h1>Tell us about you & your business</h1>
+      <p>Enter your website and we'll auto-fill most of the setup for you.</p>
     </div>
     <div class="card-body">
+
+      <!-- Personal info -->
+      <div class="f-row">
+        <div class="f-field" style="margin-bottom:0">
+          <label class="f-label">First Name <span style="color:#f87171">*</span></label>
+          <input class="f-input" id="firstName" type="text" placeholder="Jane">
+        </div>
+        <div class="f-field" style="margin-bottom:0">
+          <label class="f-label">Last Name <span style="color:#f87171">*</span></label>
+          <input class="f-input" id="lastName" type="text" placeholder="Smith">
+        </div>
+      </div>
+
+      <div class="f-field" style="margin-top:18px">
+        <label class="f-label">Your Phone <span style="color:var(--muted)">(optional)</span></label>
+        <input class="f-input" id="personalPhone" type="tel" placeholder="+1 555 000 0000">
+      </div>
+
+      <div class="section-divider"><span>Business</span></div>
+
+      <!-- Website with scan button -->
+      <div class="f-field">
+        <label class="f-label">Business Website <span style="color:var(--muted)">(auto-fills details)</span></label>
+        <div class="scan-row">
+          <input class="f-input" id="bizWebsite" type="url" placeholder="https://yourbusiness.com">
+          <button class="btn-scan" id="scanBtn" type="button" onclick="scanWebsite()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Scan Website
+          </button>
+        </div>
+        <div class="scan-banner" id="scanBanner">
+          <span class="sb-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <span class="sb-text" id="scanBannerText"></span>
+        </div>
+      </div>
+
+      <!-- Business info (may be auto-filled) -->
       <div class="f-row">
         <div class="f-field" style="margin-bottom:0">
           <label class="f-label">Business Name <span style="color:#f87171">*</span></label>
@@ -284,33 +362,12 @@
           </select>
         </div>
       </div>
-      <div style="margin-top:18px" class="f-field">
-        <label class="f-label">Business Hours</label>
-        <div class="f-row" style="margin-bottom:8px">
-          <div class="f-field" style="margin-bottom:0">
-            <label class="f-label" style="font-size:10px">Opens At</label>
-            <input class="f-input" id="hoursOpen" type="time" value="09:00">
-          </div>
-          <div class="f-field" style="margin-bottom:0">
-            <label class="f-label" style="font-size:10px">Closes At</label>
-            <input class="f-input" id="hoursClose" type="time" value="18:00">
-          </div>
-        </div>
-        <label class="f-label" style="margin-bottom:8px;display:block">Working Days</label>
-        <div class="days-grid">
-          <label class="day-chip"><input type="checkbox" name="day" value="Mon" checked><label>Mon</label></label>
-          <label class="day-chip"><input type="checkbox" name="day" value="Tue" checked><label>Tue</label></label>
-          <label class="day-chip"><input type="checkbox" name="day" value="Wed" checked><label>Wed</label></label>
-          <label class="day-chip"><input type="checkbox" name="day" value="Thu" checked><label>Thu</label></label>
-          <label class="day-chip"><input type="checkbox" name="day" value="Fri" checked><label>Fri</label></label>
-          <label class="day-chip"><input type="checkbox" name="day" value="Sat"><label>Sat</label></label>
-          <label class="day-chip"><input type="checkbox" name="day" value="Sun"><label>Sun</label></label>
-        </div>
+
+      <div class="f-field" style="margin-top:18px">
+        <label class="f-label">Business Description <span style="color:var(--muted)">(auto-filled from website)</span></label>
+        <textarea class="f-textarea" id="bizDescription" rows="3" placeholder="What does your business do? Who do you serve?"></textarea>
       </div>
-      <div class="f-field">
-        <label class="f-label">Business Address <span style="color:var(--muted)">(optional)</span></label>
-        <input class="f-input" id="bizAddress" type="text" placeholder="123 Main St, City">
-      </div>
+
       <div id="step1Err" style="font-size:13px;color:#f87171;margin-top:4px;min-height:18px"></div>
     </div>
     <div class="card-footer">
@@ -324,15 +381,49 @@
     <div class="card-header">
       <div class="step-badge">Step 2 of 4</div>
       <h1>Configure Zoya's behaviour</h1>
-      <p>Set how Zoya greets callers and what she handles for you.</p>
+      <p>Review the details auto-filled from your website, then customise how Zoya handles calls.</p>
     </div>
     <div class="card-body">
+
+      <!-- Greeting -->
       <div class="f-field">
         <label class="f-label">Greeting Script</label>
-        <textarea class="f-textarea" id="zoyaGreeting" rows="3" placeholder="How should Zoya answer your calls?"></textarea>
-        <span class="f-hint">Tip: Keep it friendly and include your business name. Example: "Hello! Thank you for calling Zara's Salon. How can I help you today?"</span>
+        <textarea class="f-textarea" id="zoyaGreeting" rows="3" placeholder='e.g. "Hello! Thank you for calling. How can I help you today?"'></textarea>
+        <span class="f-hint">Keep it warm and include your business name.</span>
       </div>
 
+      <!-- Hours + Days -->
+      <div class="f-field">
+        <label class="f-label">Business Hours</label>
+        <div class="f-row" style="margin-bottom:10px">
+          <div class="f-field" style="margin-bottom:0">
+            <label class="f-label" style="font-size:10px">Opens At</label>
+            <input class="f-input" id="hoursOpen" type="time" value="09:00">
+          </div>
+          <div class="f-field" style="margin-bottom:0">
+            <label class="f-label" style="font-size:10px">Closes At</label>
+            <input class="f-input" id="hoursClose" type="time" value="18:00">
+          </div>
+        </div>
+        <label class="f-label" style="margin-bottom:8px;display:block">Working Days</label>
+        <div class="days-grid" id="daysGrid">
+          <label class="day-chip"><input type="checkbox" name="day" value="Mon" checked><label>Mon</label></label>
+          <label class="day-chip"><input type="checkbox" name="day" value="Tue" checked><label>Tue</label></label>
+          <label class="day-chip"><input type="checkbox" name="day" value="Wed" checked><label>Wed</label></label>
+          <label class="day-chip"><input type="checkbox" name="day" value="Thu" checked><label>Thu</label></label>
+          <label class="day-chip"><input type="checkbox" name="day" value="Fri" checked><label>Fri</label></label>
+          <label class="day-chip"><input type="checkbox" name="day" value="Sat"><label>Sat</label></label>
+          <label class="day-chip"><input type="checkbox" name="day" value="Sun"><label>Sun</label></label>
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div class="f-field">
+        <label class="f-label">Business Address <span style="color:var(--muted)">(optional)</span></label>
+        <input class="f-input" id="bizAddress" type="text" placeholder="123 Main St, City">
+      </div>
+
+      <!-- Tasks -->
       <div class="f-field">
         <label class="f-label">What should Zoya do?</label>
         <div class="task-list">
@@ -342,9 +433,7 @@
               <div class="task-title">Book Appointments</div>
               <div class="task-desc">Zoya collects details and schedules bookings</div>
             </div>
-            <div class="task-check">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
+            <div class="task-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
           </div>
           <div class="task-item checked" data-task="capture_leads" onclick="toggleTask(this)">
             <span class="task-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
@@ -352,9 +441,7 @@
               <div class="task-title">Capture Leads</div>
               <div class="task-desc">Collect caller name, number and reason for calling</div>
             </div>
-            <div class="task-check">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
+            <div class="task-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
           </div>
           <div class="task-item" data-task="answer_faqs" onclick="toggleTask(this)">
             <span class="task-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
@@ -362,9 +449,7 @@
               <div class="task-title">Answer FAQs</div>
               <div class="task-desc">Zoya answers common questions about your business</div>
             </div>
-            <div class="task-check">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
+            <div class="task-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
           </div>
           <div class="task-item" data-task="forward_calls" onclick="toggleTask(this)">
             <span class="task-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>
@@ -372,15 +457,14 @@
               <div class="task-title">Forward Urgent Calls</div>
               <div class="task-desc">Transfer the call to you when the caller needs immediate help</div>
             </div>
-            <div class="task-check">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
+            <div class="task-check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
           </div>
         </div>
       </div>
 
-      <div class="f-field" id="faqSection" style="display:none">
-        <label class="f-label">Common Questions &amp; Answers <span style="color:var(--muted)">(optional)</span></label>
+      <!-- FAQs -->
+      <div class="f-field" id="faqSection">
+        <label class="f-label">Common Questions &amp; Answers <span style="color:var(--muted)">(auto-filled from website)</span></label>
         <div id="faqRows">
           <div class="faq-row">
             <input class="f-input" type="text" placeholder="Question e.g. What are your prices?">
@@ -389,7 +473,7 @@
         </div>
         <button class="add-faq-btn" id="addFaqBtn" type="button">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add another Q&A
+          Add another Q&amp;A
         </button>
       </div>
     </div>
@@ -454,7 +538,7 @@
     </div>
     <div class="card-footer">
       <button class="btn-back" id="back3">← Back</button>
-      <button class="btn-next" id="next3">Next <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+      <button class="btn-next" id="next3">Save &amp; Finish <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
     </div>
   </div>
 
@@ -481,8 +565,11 @@ const _sb = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnaWN6dWt1Y2l2aWl2aHdqYnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MjEwODksImV4cCI6MjA5ODM5NzA4OX0.UCv6mFXST0jkt_180Bz0mskJc1anX_-5spcrXkVUGgE'
 );
 
+const SUPABASE_FN = 'https://tgiczukuciviivhwjbqu.supabase.co/functions/v1';
+
 let currentUser = null;
 let currentStep = 1;
+let scrapedData  = null; // stores scrape-website result
 
 // ── AUTH CHECK ──────────────────────────────────────────────────────
 (async () => {
@@ -492,11 +579,14 @@ let currentStep = 1;
   const meta = currentUser.user_metadata || {};
   if (meta.onboarding_complete) { window.location.replace('dashboard.html'); return; }
 
-  // Pre-fill business name from admin-set metadata
+  // Pre-fill any admin-set metadata
   if (meta.business_name) document.getElementById('bizName').value = meta.business_name;
   if (meta.industry)      document.getElementById('bizIndustry').value = meta.industry;
+  if (meta.first_name)    document.getElementById('firstName').value = meta.first_name;
+  if (meta.last_name)     document.getElementById('lastName').value = meta.last_name;
+  if (meta.phone)         document.getElementById('personalPhone').value = meta.phone;
+  if (meta.website)       document.getElementById('bizWebsite').value = meta.website;
 
-  // Pre-fill greeting with business name
   updateGreetingPlaceholder();
 })();
 
@@ -515,25 +605,139 @@ function showStep(n) {
     if (i < n)  { node.classList.add('done'); node.classList.remove('active'); node.textContent = '✓'; label.className = 'step-label done'; }
     else if (i === n) { node.classList.add('active'); node.classList.remove('done'); node.textContent = i; label.className = 'step-label active'; }
     else        { node.classList.remove('active','done'); node.textContent = i; label.className = 'step-label'; }
-    if (i < 4) {
-      const line = document.getElementById('sl' + i);
-      line.classList.toggle('done', i < n);
-    }
+    if (i < 4) document.getElementById('sl' + i).classList.toggle('done', i < n);
   });
   currentStep = n;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ── WEBSITE SCANNER ──────────────────────────────────────────────────
+async function scanWebsite() {
+  const url = document.getElementById('bizWebsite').value.trim();
+  if (!url) { showScanBanner('error', 'Please enter your website URL first.'); return; }
+
+  const btn = document.getElementById('scanBtn');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="scan-spin"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.22-8.56"/></svg></span> Scanning…`;
+
+  try {
+    const { data: { session } } = await _sb.auth.getSession();
+    const res = await fetch(`${SUPABASE_FN}/scrape-website`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url }),
+    });
+
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Scrape failed');
+
+    const d = json.data;
+    scrapedData = d;
+
+    // Auto-fill step 1 fields
+    let filled = 0;
+    if (d.businessName && !document.getElementById('bizName').value) {
+      setField('bizName', d.businessName); filled++;
+    }
+    if (d.industry && !document.getElementById('bizIndustry').value) {
+      document.getElementById('bizIndustry').value = d.industry;
+      if (document.getElementById('bizIndustry').value) filled++;
+    }
+    if (d.description) { setField('bizDescription', d.description); filled++; }
+
+    // Store for step 2 pre-fill (applied when user goes to step 2)
+    // Show success banner
+    const label = json.partial ? 'Partial scan' : 'Auto-filled';
+    showScanBanner('success', `${label} ${filled} field${filled !== 1 ? 's' : ''} from your website. Review and edit below.`);
+
+  } catch (err) {
+    showScanBanner('error', err.message || 'Could not reach your website. Fill in details manually.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Scan Again`;
+  }
+}
+
+function setField(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = value;
+  el.classList.add('autofilled');
+  setTimeout(() => el.classList.remove('autofilled'), 3000);
+}
+
+function showScanBanner(type, text) {
+  const banner = document.getElementById('scanBanner');
+  const textEl = document.getElementById('scanBannerText');
+  banner.className = 'scan-banner visible' + (type === 'error' ? ' error' : '');
+  banner.querySelector('.sb-icon').innerHTML = type === 'error'
+    ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+    : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
+  textEl.textContent = text;
+}
+
 // ── STEP 1 ───────────────────────────────────────────────────────────
 document.getElementById('next1').addEventListener('click', () => {
-  const name = document.getElementById('bizName').value.trim();
-  const ind  = document.getElementById('bizIndustry').value;
-  if (!name) { document.getElementById('step1Err').textContent = 'Business name is required.'; return; }
-  if (!ind)  { document.getElementById('step1Err').textContent = 'Please select your industry.'; return; }
-  document.getElementById('step1Err').textContent = '';
+  const first = document.getElementById('firstName').value.trim();
+  const last  = document.getElementById('lastName').value.trim();
+  const name  = document.getElementById('bizName').value.trim();
+  const ind   = document.getElementById('bizIndustry').value;
+  const errEl = document.getElementById('step1Err');
+
+  if (!first) { errEl.textContent = 'First name is required.'; return; }
+  if (!last)  { errEl.textContent = 'Last name is required.'; return; }
+  if (!name)  { errEl.textContent = 'Business name is required.'; return; }
+  if (!ind)   { errEl.textContent = 'Please select your industry.'; return; }
+  errEl.textContent = '';
+
+  // Pre-fill step 2 from scraped data
+  if (scrapedData) applyScrapedToStep2(scrapedData);
   updateGreetingPlaceholder();
   showStep(2);
 });
+
+function applyScrapedToStep2(d) {
+  // Greeting
+  if (d.greeting && !document.getElementById('zoyaGreeting').value) {
+    setField('zoyaGreeting', d.greeting);
+  }
+  // Hours
+  if (d.hoursOpen)  setField('hoursOpen',  d.hoursOpen);
+  if (d.hoursClose) setField('hoursClose', d.hoursClose);
+  // Days
+  if (d.daysOpen && Array.isArray(d.daysOpen) && d.daysOpen.length) {
+    const dayMap = { Monday:'Mon', Tuesday:'Tue', Wednesday:'Wed', Thursday:'Thu', Friday:'Fri', Saturday:'Sat', Sunday:'Sun' };
+    document.querySelectorAll('input[name="day"]').forEach(cb => cb.checked = false);
+    d.daysOpen.forEach(day => {
+      const short = dayMap[day] || day.slice(0,3);
+      const cb = document.querySelector(`input[name="day"][value="${short}"]`);
+      if (cb) cb.checked = true;
+    });
+  }
+  // Address
+  if (d.address) setField('bizAddress', d.address);
+  // FAQs
+  if (d.faqs && d.faqs.length) {
+    const rows = document.getElementById('faqRows');
+    rows.innerHTML = '';
+    d.faqs.slice(0, 5).forEach(faq => {
+      const row = document.createElement('div');
+      row.className = 'faq-row';
+      row.innerHTML = `<input class="f-input autofilled" type="text" placeholder="Question" value="${escHtml(faq.q || '')}">
+                       <input class="f-input autofilled" type="text" placeholder="Answer" value="${escHtml(faq.a || '')}">`;
+      rows.appendChild(row);
+      setTimeout(() => row.querySelectorAll('.autofilled').forEach(el => el.classList.remove('autofilled')), 3000);
+    });
+    // Enable FAQ task since we have FAQs
+    const faqTask = document.querySelector('[data-task="answer_faqs"]');
+    if (faqTask && !faqTask.classList.contains('checked')) faqTask.classList.add('checked');
+  }
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
 function updateGreetingPlaceholder() {
   const name = document.getElementById('bizName').value.trim() || 'your business';
@@ -546,17 +750,11 @@ document.getElementById('bizName').addEventListener('input', updateGreetingPlace
 document.getElementById('back2').addEventListener('click', () => showStep(1));
 document.getElementById('next2').addEventListener('click', () => showStep(3));
 
-function toggleTask(el) {
-  el.classList.toggle('checked');
-  const task = el.dataset.task;
-  if (task === 'answer_faqs') {
-    document.getElementById('faqSection').style.display = el.classList.contains('checked') ? 'block' : 'none';
-  }
-}
+function toggleTask(el) { el.classList.toggle('checked'); }
 
 document.getElementById('addFaqBtn').addEventListener('click', () => {
   const rows = document.getElementById('faqRows');
-  if (rows.children.length >= 5) return;
+  if (rows.children.length >= 8) return;
   const row = document.createElement('div');
   row.className = 'faq-row';
   row.innerHTML = `<input class="f-input" type="text" placeholder="Question"><input class="f-input" type="text" placeholder="Answer">`;
@@ -587,19 +785,23 @@ document.getElementById('next3').addEventListener('click', async () => {
 
   try {
     // Collect all data
-    const bizName    = document.getElementById('bizName').value.trim();
-    const industry   = document.getElementById('bizIndustry').value;
-    const hoursOpen  = document.getElementById('hoursOpen').value;
-    const hoursClose = document.getElementById('hoursClose').value;
-    const days       = [...document.querySelectorAll('input[name="day"]:checked')].map(d => d.value);
-    const address    = document.getElementById('bizAddress').value.trim();
-    const greeting   = document.getElementById('zoyaGreeting').value.trim();
-    const tasks      = [...document.querySelectorAll('.task-item.checked')].map(t => t.dataset.task);
-    const phoneOpt   = document.querySelector('.phone-option.selected')?.id === 'opt-forward' ? 'forward' : 'new';
-    const existPhone = document.getElementById('existingPhone').value.trim();
-    const newCountry = document.getElementById('newNumberCountry').value;
+    const firstName   = document.getElementById('firstName').value.trim();
+    const lastName    = document.getElementById('lastName').value.trim();
+    const personalPh  = document.getElementById('personalPhone').value.trim();
+    const website     = document.getElementById('bizWebsite').value.trim();
+    const bizName     = document.getElementById('bizName').value.trim();
+    const industry    = document.getElementById('bizIndustry').value;
+    const description = document.getElementById('bizDescription').value.trim();
+    const hoursOpen   = document.getElementById('hoursOpen').value;
+    const hoursClose  = document.getElementById('hoursClose').value;
+    const days        = [...document.querySelectorAll('input[name="day"]:checked')].map(d => d.value);
+    const address     = document.getElementById('bizAddress').value.trim();
+    const greeting    = document.getElementById('zoyaGreeting').value.trim();
+    const tasks       = [...document.querySelectorAll('.task-item.checked')].map(t => t.dataset.task);
+    const phoneOpt    = document.querySelector('.phone-option.selected')?.id === 'opt-forward' ? 'forward' : 'new';
+    const existPhone  = document.getElementById('existingPhone').value.trim();
+    const newCountry  = document.getElementById('newNumberCountry').value;
 
-    // Collect FAQs
     const faqs = [];
     document.querySelectorAll('#faqRows .faq-row').forEach(row => {
       const [q, a] = row.querySelectorAll('input');
@@ -608,54 +810,58 @@ document.getElementById('next3').addEventListener('click', async () => {
 
     const { error } = await _sb.auth.updateUser({
       data: {
-        onboarding_complete: true,
-        business_name:       bizName,
-        industry:            industry,
-        business_hours_open: hoursOpen,
-        business_hours_close: hoursClose,
-        business_days:       days,
-        business_address:    address || null,
-        zoya_greeting:       greeting || null,
-        zoya_tasks:          tasks,
-        zoya_faqs:           faqs.length ? faqs : null,
-        phone_setup_type:    phoneOpt,
-        existing_phone:      phoneOpt === 'forward' ? existPhone : null,
-        new_number_country:  phoneOpt === 'new' ? newCountry : null,
+        onboarding_complete:   true,
+        first_name:            firstName,
+        last_name:             lastName,
+        phone:                 personalPh || null,
+        website:               website    || null,
+        business_name:         bizName,
+        industry:              industry,
+        business_description:  description || null,
+        business_hours_open:   hoursOpen,
+        business_hours_close:  hoursClose,
+        business_days:         days,
+        business_address:      address    || null,
+        zoya_greeting:         greeting   || null,
+        zoya_tasks:            tasks,
+        zoya_faqs:             faqs.length ? faqs : null,
+        scraped_website_data:  scrapedData || null,
+        phone_setup_type:      phoneOpt,
+        existing_phone:        phoneOpt === 'forward' ? existPhone : null,
+        new_number_country:    phoneOpt === 'new'     ? newCountry : null,
       }
     });
 
     if (error) throw error;
 
-    // ── CREATE ZOYA ASSISTANT immediately with fresh business details ──
+    // ── CREATE ZOYA ASSISTANT with all scraped + manual data ──
     try {
       const { data: { session } } = await _sb.auth.getSession();
-      const resp = await fetch(
-        'https://tgiczukuciviivhwjbqu.supabase.co/functions/v1/create-assistant',
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const resp = await fetch(`${SUPABASE_FN}/create-assistant`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
       const result = await resp.json();
       if (!resp.ok) console.warn('Assistant creation issue:', result);
       else console.log('Zoya assistant ready:', result.assistant_id);
     } catch (assistantErr) {
-      // Non-blocking — admin can re-trigger if needed
       console.warn('Could not create assistant automatically:', assistantErr);
     }
 
     // Build summary pills
     const pills = document.getElementById('summaryPills');
     [
+      `${firstName} ${lastName}`,
       bizName,
       industry.replace(/_/g,' '),
       `${hoursOpen} – ${hoursClose}`,
-      tasks.length + ' tasks enabled',
-      phoneOpt === 'forward' ? 'Call forwarding' : 'New number'
-    ].forEach(t => {
+      tasks.length + ' tasks',
+      phoneOpt === 'forward' ? 'Call forwarding' : 'New number',
+      scrapedData ? 'Website scanned' : null,
+    ].filter(Boolean).forEach(t => {
       pills.innerHTML += `<div class="sum-pill"><div class="dot"></div>${t}</div>`;
     });
 
@@ -664,7 +870,7 @@ document.getElementById('next3').addEventListener('click', async () => {
     alert('Something went wrong: ' + err.message);
   } finally {
     btn.disabled = false;
-    btn.innerHTML = 'Next <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>';
+    btn.innerHTML = 'Save &amp; Finish <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>';
   }
 });
 
