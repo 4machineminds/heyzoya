@@ -69,7 +69,8 @@
     .menu-toggle { display: none; background: none; border: 1px solid rgba(255,255,255,0.08); color: var(--muted2); font-size: 18px; padding: 6px 10px; border-radius: 8px; cursor: pointer; }
     .page-title { font-size: 16px; font-weight: 700; color: #fff; }
     .topbar-right { display: flex; align-items: center; gap: 10px; }
-    .topbar-logo { height: 32px; }
+    .topbar-logo { height: 32px; animation: spin 6s linear infinite; transform-origin: center; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .topbar-greeting { font-size: 14px; color: var(--muted); }
     .content { padding: 28px; flex: 1; min-width: 0; max-width: 100%; }
 
