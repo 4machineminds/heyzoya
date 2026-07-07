@@ -650,8 +650,8 @@ async function scanWebsite() {
 
     // Store for step 2 pre-fill (applied when user goes to step 2)
     // Show success banner
-    const label = json.partial ? 'Partial scan' : 'Auto-filled';
-    showScanBanner('success', `${label} ${filled} field${filled !== 1 ? 's' : ''} from your website. Review and edit below.`);
+    const total = json.filledCount || filled;
+    showScanBanner('success', `Auto-filled ${total} field${total !== 1 ? 's' : ''} from your website. Review and edit below.`);
 
   } catch (err) {
     showScanBanner('error', err.message || 'Could not reach your website. Fill in details manually.');
