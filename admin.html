@@ -219,6 +219,8 @@
   }
   .btn-icon:hover { background: rgba(255,255,255,0.05); color: #fff; border-color: var(--border2); }
   .btn-icon.danger:hover { background: rgba(248,113,113,.1); color: var(--danger); border-color: rgba(248,113,113,.2); }
+  .btn-assign { background: rgba(78,245,138,0.08); border: 1px solid rgba(78,245,138,0.2); color: #4ef58a; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 7px; cursor: pointer; font-family: inherit; transition: all .2s; white-space: nowrap; }
+  .btn-assign:hover { background: rgba(78,245,138,0.15); }
 
   .empty-state {
     text-align: center; padding: 56px 24px; color: var(--muted);
@@ -418,6 +420,11 @@
           <div class="val" id="statPending">—</div>
           <div class="sub">Awaiting verification</div>
         </div>
+        <div class="stat-card">
+          <div class="lbl">Active Zoya Lines</div>
+          <div class="val" id="statActive">—</div>
+          <div class="sub">Numbers provisioned</div>
+        </div>
       </div>
 
       <!-- USERS TABLE -->
@@ -442,6 +449,7 @@
               <tr>
                 <th>User</th>
                 <th>Status</th>
+                <th>Zoya Line</th>
                 <th>Created</th>
                 <th>Last Sign In</th>
                 <th>Actions</th>
@@ -549,6 +557,40 @@
   </div>
 </div>
 
+<!-- ── ASSIGN PHONE MODAL ── -->
+<div class="modal-overlay" id="assignModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Assign Zoya Phone Line</h3>
+      <button class="modal-close" onclick="closeAssign()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px">Assigning a Twilio number to <strong id="assignEmailLabel" style="color:#fff"></strong>. Zoya will be automatically configured with their business info.</p>
+      <div class="m-field">
+        <label>Twilio Phone Number <span style="color:var(--danger)">*</span></label>
+        <input type="tel" id="assignPhone" placeholder="+14155551234" autocomplete="off">
+        <small style="color:var(--muted);font-size:11px;margin-top:4px;display:block">Must be in E.164 format e.g. +14155551234</small>
+      </div>
+      <div class="m-field">
+        <label>Twilio Account SID <span style="color:var(--danger)">*</span></label>
+        <input type="text" id="assignTwilioSid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+      </div>
+      <div class="m-field">
+        <label>Twilio Auth Token <span style="color:var(--danger)">*</span></label>
+        <input type="password" id="assignTwilioToken" placeholder="••••••••••••••••••••••••••••••••" autocomplete="off">
+      </div>
+      <div id="assignErr" style="color:var(--danger);font-size:13px;margin-top:8px;min-height:18px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeAssign()">Cancel</button>
+      <button class="btn-create" id="assignSubmitBtn" onclick="submitAssign()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Provision Zoya
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast"></div>
 
@@ -643,27 +685,33 @@ function renderTable(users) {
     return;
   }
   tbody.innerHTML = users.map(u => {
-    const initials = (u.email || '?').charAt(0).toUpperCase();
+    const initials  = (u.email || '?').charAt(0).toUpperCase();
     const confirmed = u.email_confirmed_at;
-    const created = fmtDate(u.created_at);
-    const lastSeen = u.last_sign_in_at ? fmtDate(u.last_sign_in_at) : '—';
+    const created   = fmtDate(u.created_at);
+    const lastSeen  = u.last_sign_in_at ? fmtDate(u.last_sign_in_at) : '—';
+    const phone     = phoneMap[u.id];
+    const phoneCell = phone
+      ? `<span class="badge active"><span class="badge-dot"></span>${phone.phone_number}</span>`
+      : `<button class="btn-assign" onclick="openAssign('${u.id}','${esc(u.email)}')">+ Assign Zoya</button>`;
     return `<tr>
       <td>
         <div class="avatar-cell">
           <div class="avatar">${initials}</div>
-          <span class="email-text">${esc(u.email)}</span>
+          <div>
+            <div class="email-text">${esc(u.email)}</div>
+            ${u.user_metadata?.business_name ? `<div style="font-size:11px;color:var(--muted);margin-top:2px">${esc(u.user_metadata.business_name)}</div>` : ''}
+          </div>
         </div>
       </td>
-      <td>
-        <span class="badge ${confirmed ? 'active' : 'invited'}">
-          <span class="badge-dot"></span>
-          ${confirmed ? 'Confirmed' : 'Pending'}
-        </span>
-      </td>
+      <td><span class="badge ${confirmed ? 'active' : 'invited'}"><span class="badge-dot"></span>${confirmed ? 'Confirmed' : 'Pending'}</span></td>
+      <td>${phoneCell}</td>
       <td><span class="date-text">${created}</span></td>
       <td><span class="date-text">${lastSeen}</span></td>
       <td>
         <div class="action-row">
+          ${phone ? `<button class="btn-icon" title="Deactivate Zoya" onclick="deactivateUser('${u.id}')" style="color:var(--danger)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          </button>` : ''}
           <button class="btn-icon danger" title="Delete user" onclick="promptDelete('${u.id}','${esc(u.email)}')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
           </button>
@@ -806,6 +854,121 @@ function showToast(msg, type = 'success') {
   t.className = 'show ' + type;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { t.className = ''; }, 3200);
+}
+
+// ── PHONE NUMBERS ─────────────────────────────────────────────────
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnaWN6dWt1Y2l2aWl2aHdqYnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MjEwODksImV4cCI6MjA5ODM5NzA4OX0.UCv6mFXST0jkt_180Bz0mskJc1anX_-5spcrXkVUGgE';
+let phoneMap = {}; // user_id -> phone row
+
+async function loadPhoneNumbers() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/user_phone_numbers?select=*`, {
+      headers: {
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${sessionStorage.getItem('hz_admin_key')}`,
+      }
+    });
+    const rows = await res.json();
+    phoneMap = {};
+    let active = 0;
+    (rows || []).forEach(r => {
+      if (r.is_active) { phoneMap[r.user_id] = r; active++; }
+    });
+    document.getElementById('statActive').textContent = active;
+  } catch(e) {
+    console.warn('Could not load phone numbers:', e);
+  }
+}
+
+// Patch loadUsers to also load phone numbers
+const _origLoadUsers = loadUsers;
+loadUsers = async function() {
+  await loadPhoneNumbers();
+  await _origLoadUsers();
+};
+
+// ── ASSIGN MODAL ──────────────────────────────────────────────────
+let assignUserId = null;
+
+function openAssign(userId, email) {
+  assignUserId = userId;
+  document.getElementById('assignEmailLabel').textContent = email;
+  document.getElementById('assignPhone').value      = '';
+  document.getElementById('assignTwilioSid').value  = '';
+  document.getElementById('assignTwilioToken').value = '';
+  document.getElementById('assignErr').textContent  = '';
+  document.getElementById('assignModal').classList.add('open');
+  setTimeout(() => document.getElementById('assignPhone').focus(), 50);
+}
+function closeAssign() {
+  document.getElementById('assignModal').classList.remove('open');
+  assignUserId = null;
+}
+document.getElementById('assignModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('assignModal')) closeAssign();
+});
+
+async function submitAssign() {
+  const phone  = document.getElementById('assignPhone').value.trim();
+  const sid    = document.getElementById('assignTwilioSid').value.trim();
+  const token  = document.getElementById('assignTwilioToken').value.trim();
+  const errEl  = document.getElementById('assignErr');
+  const btn    = document.getElementById('assignSubmitBtn');
+
+  errEl.textContent = '';
+  if (!phone)  { errEl.textContent = 'Phone number is required.'; return; }
+  if (!sid)    { errEl.textContent = 'Twilio Account SID is required.'; return; }
+  if (!token)  { errEl.textContent = 'Twilio Auth Token is required.'; return; }
+  if (!phone.startsWith('+')) { errEl.textContent = 'Phone must be in E.164 format e.g. +14155551234'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Provisioning…';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/provision-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-secret': 'heyzoya-admin-2024',
+      },
+      body: JSON.stringify({
+        action:               'provision',
+        user_id:              assignUserId,
+        phone_number:         phone,
+        twilio_account_sid:   sid,
+        twilio_auth_token:    token,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Provisioning failed');
+
+    showToast(`Zoya activated for ${data.business_name || 'user'} on ${data.phone_number}`, 'success');
+    closeAssign();
+    await loadUsers();
+  } catch(err) {
+    errEl.textContent = err.message;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Provision Zoya';
+  }
+}
+
+async function deactivateUser(userId) {
+  if (!confirm('This will remove Zoya from their phone line. Continue?')) return;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/provision-user`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-secret': 'heyzoya-admin-2024' },
+      body: JSON.stringify({ action: 'deactivate', user_id: userId }),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Failed');
+    showToast('Zoya line deactivated.', 'success');
+    await loadUsers();
+  } catch(err) {
+    showToast(err.message, 'error');
+  }
 }
 </script>
 </body>
