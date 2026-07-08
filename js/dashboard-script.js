@@ -353,52 +353,79 @@ async function loadCalls(userId) {
   const container = document.getElementById('callsContainer');
   if (!container) return;
 
-  if (error || !calls || calls.length === 0) {
-    container.innerHTML = `<div class="card"><p style="color:var(--muted);font-size:14px;padding:32px 0;text-align:center">No calls yet — they'll appear here after Zoya handles her first call.</p></div>`;
+  const list = (!error && calls) ? calls : [];
+
+  // Update mini stats
+  const totalSecs  = list.reduce((s, c) => s + (c.duration_seconds || 0), 0);
+  const completed  = list.filter(c => c.status === 'ended').length;
+  const totalMins  = Math.floor(totalSecs / 60);
+  const totalSec2  = totalSecs % 60;
+  const durStr     = totalMins ? `${totalMins}m ${totalSec2}s` : `${totalSecs}s`;
+
+  const elTotal    = document.getElementById('cStatTotal');
+  const elDuration = document.getElementById('cStatDuration');
+  const elEnded    = document.getElementById('cStatEnded');
+  if (elTotal)    elTotal.textContent    = list.length;
+  if (elDuration) elDuration.textContent = list.length ? durStr : '0m';
+  if (elEnded)    elEnded.textContent    = completed;
+
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="calls-empty">
+        <div class="calls-empty-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.4 2 2 0 0 1 3.62 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.97-.97a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+          </svg>
+        </div>
+        <h3>No calls yet</h3>
+        <p>Once Zoya starts answering calls, each one will appear here with a full summary, recording, and caller details.</p>
+      </div>`;
     return;
   }
 
-  container.innerHTML = `
-    <div class="card" style="padding:0;overflow:hidden">
-      <table class="appt-table" id="callsTable">
-        <thead><tr>
-          <th>Caller</th>
-          <th>Duration</th>
-          <th>Status</th>
-          <th>Summary</th>
-          <th>Recording</th>
-          <th>Date</th>
-        </tr></thead>
-        <tbody>${calls.map(c => {
-          const lead = Array.isArray(c.leads) ? c.leads[0] : c.leads;
-          const callerName  = lead?.name  || '—';
-          const callerPhone = lead?.phone || c.caller_number || '—';
-          const statusBadge = c.status === 'ended'
-            ? 'badge-confirmed' : c.status === 'in-progress'
-            ? 'badge-pending'   : 'badge-cancelled';
-          const summary = c.summary
-            ? `<span title="${c.summary.replace(/"/g,'&quot;')}" style="display:block;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted2);font-size:12px">${c.summary}</span>`
-            : '<span style="color:var(--muted);font-size:12px">—</span>';
-          const recording = c.recording_url
-            ? `<a href="${c.recording_url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;color:var(--accent2);font-size:12px;font-weight:600;text-decoration:none;background:rgba(247,217,161,0.08);border:1px solid rgba(247,217,161,0.18);border-radius:6px;padding:4px 10px">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play
-               </a>`
-            : '<span style="color:var(--muted);font-size:12px">—</span>';
-          return `<tr>
-            <td>
-              <div class="appt-name">${callerName}</div>
-              <div class="appt-detail">${callerPhone}</div>
-            </td>
-            <td style="font-weight:600;color:#fff">${fmtDuration(c.duration_seconds)}</td>
-            <td><span class="badge ${statusBadge}">${c.status || '—'}</span></td>
-            <td>${summary}</td>
-            <td>${recording}</td>
-            <td style="color:var(--muted);font-size:13px;white-space:nowrap">${fmtDate(c.started_at)}</td>
-          </tr>`;
-        }).join('')}</tbody>
-      </table>
+  container.innerHTML = `<div class="calls-list">${list.map(c => {
+    const lead        = Array.isArray(c.leads) ? c.leads[0] : c.leads;
+    const callerName  = lead?.name  || 'Unknown Caller';
+    const callerPhone = lead?.phone || c.caller_number || '—';
+    const initials    = callerName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    const statusClass = c.status === 'ended' ? 'status-ended'
+                      : c.status === 'in-progress' ? 'status-in-progress' : 'status-failed';
+    const statusColor = c.status === 'ended' ? 'var(--success)'
+                      : c.status === 'in-progress' ? 'var(--accent2)' : 'var(--danger)';
+    const dur         = fmtDuration(c.duration_seconds);
+    const dt          = fmtDate(c.started_at);
+    const summary     = c.summary || '';
+    const recording   = c.recording_url;
+
+    return `<div class="call-card ${statusClass}">
+      <div class="call-avatar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.4 2 2 0 0 1 3.62 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.97-.97a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </div>
+      <div class="call-body">
+        <div class="call-name">${callerName}</div>
+        <div class="call-phone">${callerPhone}</div>
+        ${summary ? `<div class="call-summary">${summary}</div>` : ''}
+      </div>
+      <div class="call-meta">
+        <div class="call-duration">${dur}</div>
+        <div class="call-date">${dt}</div>
+        <span class="call-status-badge" style="color:${statusColor}">${c.status || '—'}</span>
+        ${recording
+          ? `<a class="call-play" href="${recording}" target="_blank" rel="noopener">
+               <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play
+             </a>`
+          : ''}
+      </div>
     </div>`;
+  }).join('')}</div>`;
 }
+
+window.refreshCalls = async function() {
+  const btn = document.getElementById('callsRefreshBtn');
+  if (btn) btn.classList.add('spinning');
+  await loadCalls(window._currentUserId);
+  if (btn) { btn.classList.remove('spinning'); showToast('Calls refreshed!'); }
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // USAGE — load from Supabase for account section
