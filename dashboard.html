@@ -1018,8 +1018,8 @@
   window.showToast = showToast;
 
   // ── NAVIGATION ──
-  const sections   = ['overview', 'leads', 'appointments', 'account'];
-  const pageTitles = { overview: 'Overview', leads: 'Leads', appointments: 'Appointments', account: 'Account Settings' };
+  const sections   = ['overview', 'leads', 'calls', 'appointments', 'account'];
+  const pageTitles = { overview: 'Overview', leads: 'Leads', calls: 'Calls', appointments: 'Appointments', account: 'Account Settings' };
 
   function switchSection(sec) {
     document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.section === sec));
