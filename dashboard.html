@@ -573,29 +573,29 @@
           <div class="card">
             <div class="chart-header">
               <div>
-                <div class="chart-title">Call Sources</div>
-                <div class="chart-value">150</div>
+                <div class="chart-title">Call Breakdown</div>
+                <div class="chart-value" id="chartValCalls">—</div>
               </div>
             </div>
             <div class="donut-wrap">
               <canvas id="donutChart" style="max-width:180px;max-height:180px"></canvas>
               <div class="donut-center">
-                <div class="donut-center-val">150</div>
+                <div class="donut-center-val" id="donutCenterVal">—</div>
                 <div class="donut-center-lbl">Total Calls</div>
               </div>
             </div>
             <div class="donut-stats">
               <div class="donut-stat-row">
-                <span class="donut-stat-label"><span class="legend-dot" style="background:#f7d9a1"></span>Organic</span>
-                <span class="donut-stat-val">80%</span>
+                <span class="donut-stat-label"><span class="legend-dot" style="background:#4ef58a"></span>Completed</span>
+                <span class="donut-stat-val" id="donutPctEnded">—</span>
               </div>
               <div class="donut-stat-row">
-                <span class="donut-stat-label"><span class="legend-dot" style="background:#f2b9b8"></span>Referral</span>
-                <span class="donut-stat-val">60%</span>
+                <span class="donut-stat-label"><span class="legend-dot" style="background:#f2b9b8"></span>Failed</span>
+                <span class="donut-stat-val" id="donutPctFailed">—</span>
               </div>
               <div class="donut-stat-row">
-                <span class="donut-stat-label"><span class="legend-dot" style="background:#7ab4ff"></span>Direct</span>
-                <span class="donut-stat-val">50%</span>
+                <span class="donut-stat-label"><span class="legend-dot" style="background:#7ab4ff"></span>In Progress</span>
+                <span class="donut-stat-val" id="donutPctActive">—</span>
               </div>
             </div>
           </div>
@@ -605,7 +605,7 @@
             <div class="chart-header">
               <div>
                 <div class="chart-title">Leads by Week</div>
-                <div class="chart-value">$2.4K <span style="font-size:13px;font-weight:400;color:var(--muted)">estimated value</span></div>
+                <div class="chart-value" id="chartValLeads">—</div>
               </div>
               <div class="chart-legend">
                 <span class="legend-item"><span class="legend-dot" style="background:#f7d9a1"></span>Leads</span>
@@ -642,7 +642,7 @@
             <div class="chart-header">
               <div>
                 <div class="chart-title">Call Activity</div>
-                <div class="chart-value">257 <span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(78,245,138,0.12);color:var(--success);vertical-align:middle">↑ 6.9%</span></div>
+                <div class="chart-value" id="chartValActivity">—</div>
               </div>
             </div>
             <canvas id="leadsChart" style="max-height:160px"></canvas>

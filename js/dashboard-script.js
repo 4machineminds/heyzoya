@@ -24,46 +24,61 @@ function fmtDuration(secs) {
 // OVERVIEW CHARTS
 // ─────────────────────────────────────────────────────────────────────────────
 async function initOverviewCharts(userId) {
-  // Fetch last 7 days of calls
-  const since = new Date(Date.now() - 7 * 86400000).toISOString();
-  const { data: calls } = await _supabase
-    .from('calls')
-    .select('started_at, duration_seconds, status')
-    .eq('user_id', userId)
-    .gte('started_at', since)
-    .order('started_at');
+  const since7  = new Date(Date.now() -  7 * 86400000).toISOString();
+  const since14 = new Date(Date.now() - 14 * 86400000).toISOString();
 
-  // Build daily buckets
+  const [{ data: calls7 }, { data: calls14 }, { data: leads7 }] = await Promise.all([
+    _supabase.from('calls').select('started_at, status').eq('user_id', userId).gte('started_at', since7).order('started_at'),
+    _supabase.from('calls').select('started_at').eq('user_id', userId).gte('started_at', since14).lt('started_at', since7),
+    _supabase.from('leads').select('created_at').eq('user_id', userId).gte('created_at', since7),
+  ]);
+
+  const allCalls7 = calls7 || [];
   const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const callsByDay = Array(7).fill(0);
-  (calls || []).forEach(c => {
-    const d = new Date(c.started_at).getDay(); // 0=Sun
-    const idx = (d + 6) % 7;
-    callsByDay[idx]++;
-  });
 
-  // Fetch leads per day
-  const { data: leads } = await _supabase
-    .from('leads')
-    .select('created_at')
-    .eq('user_id', userId)
-    .gte('created_at', since);
+  // Daily buckets (Mon=0 … Sun=6)
+  const callsByDay = Array(7).fill(0);
+  allCalls7.forEach(c => { callsByDay[(new Date(c.started_at).getDay() + 6) % 7]++; });
 
   const leadsByDay = Array(7).fill(0);
-  (leads || []).forEach(l => {
-    const d = new Date(l.created_at).getDay();
-    const idx = (d + 6) % 7;
-    leadsByDay[idx]++;
-  });
+  (leads7 || []).forEach(l => { leadsByDay[(new Date(l.created_at).getDay() + 6) % 7]++; });
 
-  // Donut: call source breakdown (static until we track UTM)
+  // ── Populate chart header values ──
+  const totalCalls7  = allCalls7.length;
+  const totalCalls14 = (calls14 || []).length;
+  const totalLeads7  = (leads7 || []).length;
+
+  const el = id => document.getElementById(id);
+
+  if (el('donutCenterVal')) el('donutCenterVal').textContent = totalCalls7;
+  if (el('chartValCalls'))  el('chartValCalls').textContent  = totalCalls7 + ' calls this week';
+  if (el('chartValLeads'))  el('chartValLeads').textContent  = totalLeads7 + ' leads this week';
+
+  // Call Activity: total + % vs prev week
+  const actPct = totalCalls14 > 0
+    ? Math.round(((totalCalls7 - totalCalls14) / totalCalls14) * 100)
+    : null;
+  const actBadge = actPct === null
+    ? ''
+    : `<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(78,245,138,0.12);color:var(--success);vertical-align:middle">${actPct >= 0 ? '↑' : '↓'} ${Math.abs(actPct)}%</span>`;
+  if (el('chartValActivity')) el('chartValActivity').innerHTML = `${totalCalls7} ${actBadge}`;
+
+  // ── Donut: real call status breakdown ──
+  const ended     = allCalls7.filter(c => c.status === 'ended').length;
+  const failed    = allCalls7.filter(c => c.status === 'failed').length;
+  const inProg    = allCalls7.filter(c => c.status === 'in-progress').length;
+  const pct = n => totalCalls7 > 0 ? Math.round((n / totalCalls7) * 100) + '%' : '0%';
+  if (el('donutPctEnded'))  el('donutPctEnded').textContent  = pct(ended);
+  if (el('donutPctFailed')) el('donutPctFailed').textContent = pct(failed);
+  if (el('donutPctActive')) el('donutPctActive').textContent = pct(inProg);
+
   const donutCanvas = document.getElementById('donutChart');
   if (donutCanvas) {
     new Chart(donutCanvas.getContext('2d'), {
       type: 'doughnut',
       data: {
-        labels: ['Organic', 'Referral', 'Direct'],
-        datasets: [{ data: [80, 60, 50], backgroundColor: ['#f7d9a1','#f2b9b8','#7ab4ff'], borderColor: 'transparent', hoverOffset: 6 }],
+        labels: ['Completed', 'Failed', 'In Progress'],
+        datasets: [{ data: [ended || 1, failed, inProg], backgroundColor: ['#4ef58a','#f2b9b8','#7ab4ff'], borderColor: 'transparent', hoverOffset: 6 }],
       },
       options: { responsive: true, cutout: '70%', plugins: { legend: { display: false } } },
     });
