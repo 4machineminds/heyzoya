@@ -592,10 +592,12 @@ async function loadUsage(userId) {
   const month = new Date().toISOString().slice(0, 7);
   const monthLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-  const [{ data: usage }, { data: { user } }] = await Promise.all([
+  // Force a session refresh so we always get the latest user_metadata (plan may have been changed by admin)
+  const [{ data: usage }, refreshResult] = await Promise.all([
     _supabase.from('usage_monthly').select('*').eq('user_id', userId).eq('month', month).single(),
-    _supabase.auth.getUser(),
+    _supabase.auth.refreshSession(),
   ]);
+  const user = refreshResult?.data?.session?.user || refreshResult?.data?.user || null;
 
   const el = id => document.getElementById(id);
 
@@ -668,6 +670,7 @@ window.dashboardBoot = async function(userId) {
   window.saveAppointment = saveAppointment;
   window.deleteAppt      = deleteAppt;
   window.updateLeadStatus = updateLeadStatus;
+  window.refreshPlanUsage = () => loadUsage(userId);
 
   // Load all data in parallel
   await Promise.all([

@@ -1051,10 +1051,17 @@
     document.getElementById('pageTitle').textContent = pageTitles[sec] || sec;
   }
   document.querySelectorAll('.nav-item').forEach(btn => {
-    btn.addEventListener('click', () => { switchSection(btn.dataset.section); if (window.innerWidth < 900) closeSidebar(); });
+    btn.addEventListener('click', () => {
+      switchSection(btn.dataset.section);
+      if (btn.dataset.section === 'account' && window.refreshPlanUsage) window.refreshPlanUsage();
+      if (window.innerWidth < 900) closeSidebar();
+    });
   });
   document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
-    btn.addEventListener('click', () => switchSection(btn.dataset.section));
+    btn.addEventListener('click', () => {
+      switchSection(btn.dataset.section);
+      if (btn.dataset.section === 'account' && window.refreshPlanUsage) window.refreshPlanUsage();
+    });
   });
 
   // ── SIDEBAR ──
