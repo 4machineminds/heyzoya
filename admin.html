@@ -449,6 +449,7 @@
               <tr>
                 <th>User</th>
                 <th>Status</th>
+                <th>Plan</th>
                 <th>Zoya Line</th>
                 <th>Created</th>
                 <th>Last Sign In</th>
@@ -551,6 +552,83 @@
     <div class="modal-footer">
       <button class="btn-cancel" id="cancelCreate">Cancel</button>
       <button class="btn-submit" id="submitCreate">Create User</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── EDIT USER MODAL ── -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Edit User</h3>
+      <button class="modal-close" onclick="closeEdit()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-section">Personal Information</div>
+      <div class="m-row">
+        <div class="m-field">
+          <label>First Name</label>
+          <input type="text" id="editFirstName" placeholder="First name">
+        </div>
+        <div class="m-field">
+          <label>Last Name</label>
+          <input type="text" id="editLastName" placeholder="Last name">
+        </div>
+      </div>
+      <div class="m-field">
+        <label>Email <span style="color:var(--muted);font-weight:400">(read-only)</span></label>
+        <input type="email" id="editEmail" disabled style="opacity:.5;cursor:not-allowed">
+      </div>
+      <div class="m-row">
+        <div class="m-field">
+          <label>Phone</label>
+          <input type="tel" id="editPhone" placeholder="+1 (555) 000-0000">
+        </div>
+        <div class="m-field">
+          <label>Industry</label>
+          <select id="editIndustry">
+            <option value="">Select industry</option>
+            <option value="salons_spas">Salons &amp; Spas</option>
+            <option value="home_services">Home Services</option>
+            <option value="legal_practices">Legal Practices</option>
+            <option value="automotive_repair">Automotive Repair</option>
+            <option value="small_business">Small Business</option>
+            <option value="real_estate">Real Estate</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="m-section">Business Information</div>
+      <div class="m-field">
+        <label>Business Name</label>
+        <input type="text" id="editBizName" placeholder="My Business">
+      </div>
+      <div class="m-field">
+        <label>Website</label>
+        <input type="url" id="editWebsite" placeholder="https://yourbusiness.com">
+      </div>
+      <div class="m-field">
+        <label>Business Description</label>
+        <textarea id="editBizDesc" placeholder="Brief description…"></textarea>
+      </div>
+
+      <div class="m-section">Subscription Plan</div>
+      <div class="m-field">
+        <label>Plan</label>
+        <select id="editPlan">
+          <option value="">No plan assigned</option>
+          <option value="essential">Essential — $49/month · 80 minutes</option>
+          <option value="pro">Pro — $125/month · 250 minutes</option>
+          <option value="plus">Plus — $299/month · 700 minutes</option>
+        </select>
+      </div>
+
+      <div id="editModalErr" style="font-size:12.5px;color:var(--danger);margin-top:10px;text-align:center;min-height:18px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeEdit()">Cancel</button>
+      <button class="btn-submit" id="submitEdit" onclick="saveEdit()">Save Changes</button>
     </div>
   </div>
 </div>
@@ -704,6 +782,12 @@ function renderTable(users) {
     const phoneCell = phone
       ? `<span class="badge active"><span class="badge-dot"></span>${phone.phone_number}</span>`
       : `<button class="btn-assign" onclick="openAssign('${u.id}','${esc(u.email)}')">+ Assign Zoya</button>`;
+    const planKey = u.user_metadata?.plan || '';
+    const planLabels = { essential: 'Essential', pro: 'Pro', plus: 'Plus' };
+    const planColors = { essential: '#7ab4ff', pro: '#f7d9a1', plus: '#f2b9b8' };
+    const planCell = planKey
+      ? `<span style="font-size:11px;font-weight:700;color:${planColors[planKey]};background:${planColors[planKey]}18;border:1px solid ${planColors[planKey]}30;border-radius:6px;padding:3px 8px">${planLabels[planKey]}</span>`
+      : `<span style="font-size:11px;color:var(--muted)">—</span>`;
     return `<tr>
       <td>
         <div class="avatar-cell">
@@ -715,11 +799,15 @@ function renderTable(users) {
         </div>
       </td>
       <td><span class="badge ${confirmed ? 'active' : 'invited'}"><span class="badge-dot"></span>${confirmed ? 'Confirmed' : 'Pending'}</span></td>
+      <td>${planCell}</td>
       <td>${phoneCell}</td>
       <td><span class="date-text">${created}</span></td>
       <td><span class="date-text">${lastSeen}</span></td>
       <td>
         <div class="action-row">
+          <button class="btn-icon" title="Edit user" onclick="openEdit('${u.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
           ${phone ? `<button class="btn-icon" title="Deactivate Zoya" onclick="deactivateUser('${u.id}')" style="color:var(--danger)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
           </button>` : ''}
@@ -814,6 +902,86 @@ document.getElementById('submitCreate').addEventListener('click', async () => {
     btn.textContent = 'Create User';
   }
 });
+
+// ── EDIT USER ─────────────────────────────────────────────────────
+const editModal = document.getElementById('editModal');
+let editTargetId = null;
+
+function openEdit(userId) {
+  const user = allUsers.find(u => u.id === userId);
+  if (!user) return;
+  editTargetId = userId;
+  const m = user.user_metadata || {};
+  document.getElementById('editFirstName').value = m.first_name  || '';
+  document.getElementById('editLastName').value  = m.last_name   || '';
+  document.getElementById('editEmail').value     = user.email    || '';
+  document.getElementById('editPhone').value     = m.phone       || '';
+  document.getElementById('editIndustry').value  = m.industry    || '';
+  document.getElementById('editBizName').value   = m.business_name        || '';
+  document.getElementById('editWebsite').value   = m.website              || '';
+  document.getElementById('editBizDesc').value   = m.business_description || '';
+  document.getElementById('editPlan').value      = m.plan        || '';
+  document.getElementById('editModalErr').textContent = '';
+  editModal.classList.add('open');
+}
+
+function closeEdit() {
+  editModal.classList.remove('open');
+  editTargetId = null;
+}
+
+async function saveEdit() {
+  if (!editTargetId) return;
+  const btn = document.getElementById('submitEdit');
+  const errEl = document.getElementById('editModalErr');
+  errEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  const firstName = document.getElementById('editFirstName').value.trim();
+  const lastName  = document.getElementById('editLastName').value.trim();
+  const phone     = document.getElementById('editPhone').value.trim();
+  const industry  = document.getElementById('editIndustry').value;
+  const bizName   = document.getElementById('editBizName').value.trim();
+  const website   = document.getElementById('editWebsite').value.trim();
+  const bizDesc   = document.getElementById('editBizDesc').value.trim();
+  const plan      = document.getElementById('editPlan').value;
+
+  try {
+    const user = allUsers.find(u => u.id === editTargetId);
+    const existing = user?.user_metadata || {};
+    const { data, error } = await sb.auth.admin.updateUserById(editTargetId, {
+      user_metadata: {
+        ...existing,
+        first_name:           firstName || undefined,
+        last_name:            lastName  || undefined,
+        full_name:            [firstName, lastName].filter(Boolean).join(' ') || undefined,
+        phone:                phone    || undefined,
+        industry:             industry || undefined,
+        business_name:        bizName  || undefined,
+        website:              website  || undefined,
+        business_description: bizDesc  || undefined,
+        plan:                 plan     || undefined,
+      },
+    });
+    if (error) throw error;
+
+    // Update local copy
+    const idx = allUsers.findIndex(u => u.id === editTargetId);
+    if (idx !== -1) allUsers[idx] = data.user;
+    updateStats(allUsers);
+    renderTable(allUsers);
+    closeEdit();
+    showToast('User updated successfully!', 'success');
+  } catch (err) {
+    errEl.textContent = err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+  }
+}
+
+editModal.addEventListener('click', (e) => { if (e.target === editModal) closeEdit(); });
 
 // ── DELETE USER ───────────────────────────────────────────────────
 const deleteModal = document.getElementById('deleteModal');
