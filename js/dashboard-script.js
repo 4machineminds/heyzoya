@@ -124,16 +124,61 @@ async function initOverviewCharts(userId) {
 // ─────────────────────────────────────────────────────────────────────────────
 // OVERVIEW STATS + MINI APPOINTMENTS
 // ─────────────────────────────────────────────────────────────────────────────
+function pctBadge(el, current, prev) {
+  if (!el) return;
+  if (!prev && !current) { el.textContent = '—'; el.className = 'stat-badge'; return; }
+  if (!prev) { el.textContent = '↑ New'; el.className = 'stat-badge up'; return; }
+  const pct = Math.round(((current - prev) / prev) * 100);
+  el.textContent = pct >= 0 ? `↑ ${pct}%` : `↓ ${Math.abs(pct)}%`;
+  el.className = 'stat-badge ' + (pct >= 0 ? 'up' : 'down');
+}
+
 async function loadOverviewStats(userId) {
-  const [{ count: leadCount }, { count: apptCount }, { count: activeCount }] = await Promise.all([
+  const now = new Date();
+  const thisWeekStart = new Date(now - 7 * 86400000).toISOString();
+  const lastWeekStart = new Date(now - 14 * 86400000).toISOString();
+
+  const [
+    { count: leadCount },
+    { count: apptCount },
+    { count: callCount },
+    { count: activeCount },
+    { count: leadsTW },
+    { count: apptsTW },
+    { count: callsTW },
+    { count: activeTW },
+    { count: leadsLW },
+    { count: apptsLW },
+    { count: callsLW },
+    { count: activeLW },
+  ] = await Promise.all([
+    // All-time totals
     _supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', userId),
     _supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-    _supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'new'),
+    _supabase.from('calls').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+    _supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', userId).in('status', ['new', 'contacted']),
+    // This week
+    _supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', userId).gte('created_at', thisWeekStart),
+    _supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('user_id', userId).gte('created_at', thisWeekStart),
+    _supabase.from('calls').select('*', { count: 'exact', head: true }).eq('user_id', userId).gte('started_at', thisWeekStart),
+    _supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', userId).in('status', ['new', 'contacted']).gte('created_at', thisWeekStart),
+    // Last week
+    _supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', userId).gte('created_at', lastWeekStart).lt('created_at', thisWeekStart),
+    _supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('user_id', userId).gte('created_at', lastWeekStart).lt('created_at', thisWeekStart),
+    _supabase.from('calls').select('*', { count: 'exact', head: true }).eq('user_id', userId).gte('started_at', lastWeekStart).lt('started_at', thisWeekStart),
+    _supabase.from('leads').select('*', { count: 'exact', head: true }).eq('user_id', userId).in('status', ['new', 'contacted']).gte('created_at', lastWeekStart).lt('created_at', thisWeekStart),
   ]);
 
-  document.getElementById('statLeads').textContent  = leadCount  ?? 0;
-  document.getElementById('statAppts').textContent  = apptCount  ?? 0;
-  document.getElementById('statActive').textContent = activeCount ?? 0;
+  const el = id => document.getElementById(id);
+  if (el('statLeads'))  el('statLeads').textContent  = leadCount  ?? 0;
+  if (el('statAppts'))  el('statAppts').textContent  = apptCount  ?? 0;
+  if (el('statCalls'))  el('statCalls').textContent  = callCount  ?? 0;
+  if (el('statActive')) el('statActive').textContent = activeCount ?? 0;
+
+  pctBadge(el('sfLeads'),  leadsTW  ?? 0, leadsLW  ?? 0);
+  pctBadge(el('sfAppts'),  apptsTW  ?? 0, apptsLW  ?? 0);
+  pctBadge(el('sfCalls'),  callsTW  ?? 0, callsLW  ?? 0);
+  pctBadge(el('sfActive'), activeTW ?? 0, activeLW ?? 0);
 
   // Mini appointments table
   const { data: recent } = await _supabase
@@ -290,13 +335,53 @@ async function deleteAppt(id) {
 // LEADS SECTION — real data
 // ─────────────────────────────────────────────────────────────────────────────
 async function loadLeads(userId) {
-  const { data: leads, error } = await _supabase
-    .from('leads')
-    .select('*, calls(duration_seconds, started_at)')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+  const [{ data: leads, error }, { data: allCalls }] = await Promise.all([
+    _supabase.from('leads').select('*, calls(duration_seconds, started_at)').eq('user_id', userId).order('created_at', { ascending: false }),
+    _supabase.from('calls').select('caller_number, started_at').eq('user_id', userId).not('caller_number', 'is', null),
+  ]);
 
   const container = document.getElementById('leadsContainer');
+  const repeatContainer = document.getElementById('repeatCallersContainer');
+
+  // ── Repeat callers: group calls by caller_number, find count > 1 ──
+  if (repeatContainer) {
+    const callMap = {};
+    (allCalls || []).forEach(c => {
+      if (!c.caller_number) return;
+      callMap[c.caller_number] = (callMap[c.caller_number] || 0) + 1;
+    });
+    const repeats = Object.entries(callMap).filter(([, n]) => n > 1).sort((a, b) => b[1] - a[1]);
+
+    if (repeats.length > 0) {
+      // Match to lead records for names
+      const leadsByPhone = {};
+      (leads || []).forEach(l => { if (l.phone) leadsByPhone[l.phone] = l; });
+
+      repeatContainer.innerHTML = `
+        <div class="repeat-callers-header">
+          <h3>Repeat Callers</h3>
+          <span class="repeat-badge">Hot Leads</span>
+        </div>
+        <div class="repeat-list">
+          ${repeats.map(([phone, count]) => {
+            const lead = leadsByPhone[phone];
+            const name = lead?.name || 'Unknown Caller';
+            const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+            return `<div class="repeat-card">
+              <div class="repeat-avatar">${initials}</div>
+              <div class="repeat-info">
+                <div class="repeat-name">${name}</div>
+                <div class="repeat-phone">${phone}</div>
+              </div>
+              <span class="repeat-count">${count} calls</span>
+            </div>`;
+          }).join('')}
+        </div>`;
+    } else {
+      repeatContainer.innerHTML = '';
+    }
+  }
+
   if (!container) return;
 
   if (error || !leads || leads.length === 0) {
@@ -312,12 +397,13 @@ async function loadLeads(userId) {
         </tr></thead>
         <tbody>${leads.map(l => {
           const badge = l.status === 'new' ? 'badge-pending' : l.status === 'qualified' ? 'badge-confirmed' : l.status === 'lost' ? 'badge-cancelled' : 'badge-pending';
+          const callArr = Array.isArray(l.calls) ? l.calls[0] : l.calls;
           return `<tr>
             <td><div class="appt-name">${l.name || '—'}</div></td>
             <td>${l.phone || '—'}</td>
             <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.intent || '—'}</td>
             <td><span class="badge ${badge}">${l.status}</span></td>
-            <td>${fmtDuration(l.calls?.duration_seconds)}</td>
+            <td>${fmtDuration(callArr?.duration_seconds)}</td>
             <td style="color:var(--muted)">${fmtDate(l.created_at)}</td>
             <td><div class="appt-actions">
               <select class="btn-icon" style="cursor:pointer" onchange="updateLeadStatus('${l.id}', this.value)">

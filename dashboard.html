@@ -301,6 +301,18 @@
     }
     .calls-empty h3 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
     .calls-empty p  { font-size: 14px; color: var(--muted); line-height: 1.65; max-width: 340px; margin: 0 auto; }
+
+    /* Repeat callers */
+    .repeat-callers-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+    .repeat-callers-header h3 { font-size:15px; font-weight:700; color:#fff; }
+    .repeat-badge { font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; background:rgba(248,113,113,0.15); color:#f87171; border:1px solid rgba(248,113,113,0.25); border-radius:20px; padding:2px 8px; }
+    .repeat-list { display:flex; flex-direction:column; gap:8px; margin-bottom:24px; }
+    .repeat-card { background:rgba(248,113,113,0.05); border:1px solid rgba(248,113,113,0.2); border-radius:12px; padding:14px 18px; display:flex; align-items:center; gap:14px; }
+    .repeat-avatar { width:38px; height:38px; border-radius:10px; background:rgba(248,113,113,0.15); display:flex; align-items:center; justify-content:center; color:#f87171; font-size:13px; font-weight:700; flex-shrink:0; }
+    .repeat-info { flex:1; min-width:0; }
+    .repeat-name { font-size:14px; font-weight:600; color:#fff; }
+    .repeat-phone { font-size:12px; color:var(--muted); }
+    .repeat-count { font-size:12px; font-weight:700; color:#f87171; background:rgba(248,113,113,0.1); border-radius:20px; padding:3px 10px; white-space:nowrap; }
     .call-audio-player { padding: 10px 0 0; grid-column: 1 / -1; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 4px; }
     .call-audio-player audio::-webkit-media-controls-panel { background: rgba(30,30,40,0.95); }
     .call-play { cursor: pointer; background: none; border: none; padding: 0; }
@@ -498,10 +510,10 @@
             </div>
             <div>
               <div class="stat-label">Total Leads</div>
-              <div class="stat-value" id="statLeads">24</div>
+              <div class="stat-value" id="statLeads">—</div>
             </div>
             <div class="stat-footer">
-              <span class="stat-badge up">↑ 12%</span>
+              <span class="stat-badge up" id="sfLeads">—</span>
               <span class="stat-period">vs last week</span>
             </div>
           </div>
@@ -514,10 +526,10 @@
             </div>
             <div>
               <div class="stat-label">Appointments</div>
-              <div class="stat-value" id="statAppts">7</div>
+              <div class="stat-value" id="statAppts">—</div>
             </div>
             <div class="stat-footer">
-              <span class="stat-badge up">↑ 8%</span>
+              <span class="stat-badge up" id="sfAppts">—</span>
               <span class="stat-period">vs last week</span>
             </div>
           </div>
@@ -530,10 +542,10 @@
             </div>
             <div>
               <div class="stat-label">Active Leads</div>
-              <div class="stat-value" id="statActive">18</div>
+              <div class="stat-value" id="statActive">—</div>
             </div>
             <div class="stat-footer">
-              <span class="stat-badge down">↓ 3%</span>
+              <span class="stat-badge up" id="sfActive">—</span>
               <span class="stat-period">vs last week</span>
             </div>
           </div>
@@ -545,12 +557,12 @@
               <span class="stat-menu">···</span>
             </div>
             <div>
-              <div class="stat-label">Avg. Response Rate</div>
-              <div class="stat-value">94%</div>
+              <div class="stat-label">Total Calls</div>
+              <div class="stat-value" id="statCalls">—</div>
             </div>
             <div class="stat-footer">
-              <span class="stat-badge up">↑ 5%</span>
-              <span class="stat-period">vs last month</span>
+              <span class="stat-badge up" id="sfCalls">—</span>
+              <span class="stat-period">vs last week</span>
             </div>
           </div>
         </div>
@@ -677,6 +689,7 @@
           <h2>Leads</h2>
           <p>Every caller Zoya captures automatically appears here</p>
         </div>
+        <div id="repeatCallersContainer"></div>
         <div id="leadsContainer">
           <div class="card"><p style="color:var(--muted);font-size:14px;padding:24px 0;text-align:center">Loading leads…</p></div>
         </div>
