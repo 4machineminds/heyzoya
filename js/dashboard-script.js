@@ -266,7 +266,9 @@ function renderAppointmentRows(list) {
 
   tbody.innerHTML = list.map(a => {
     const badge = a.status === 'confirmed' ? 'badge-confirmed' : a.status === 'pending' ? 'badge-pending' : 'badge-cancelled';
-    const dt = a.appt_date ? fmtDate(a.appt_date + 'T00:00:00') : '—';
+    const dt = a.appt_date
+      ? fmtDate(a.appt_date + 'T00:00:00')
+      : '<span style="font-size:11px;color:var(--muted);font-style:italic">Unscheduled</span>';
     return `<tr>
       <td><div class="appt-name">${a.client_name}</div><div class="appt-detail">${a.client_phone || '—'}</div></td>
       <td><div>${dt}</div><div class="appt-detail">${a.appt_time ? fmtTime(a.appt_time) : ''}</div></td>
