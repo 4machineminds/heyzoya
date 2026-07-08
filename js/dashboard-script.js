@@ -411,9 +411,11 @@ async function loadCalls(userId) {
         <div class="call-date">${dt}</div>
         <span class="call-status-badge" style="color:${statusColor}">${c.status || '—'}</span>
         ${recording
-          ? `<a class="call-play" href="${recording}" target="_blank" rel="noopener">
-               <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play
-             </a>`
+          ? `<button class="call-play" onclick="toggleCallAudio(this,'${recording}')">
+               <svg class="play-icon" width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+               <svg class="pause-icon" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+               <span>Play</span>
+             </button>`
           : ''}
       </div>
     </div>`;
@@ -425,6 +427,53 @@ window.refreshCalls = async function() {
   if (btn) btn.classList.add('spinning');
   await loadCalls(window._currentUserId);
   if (btn) { btn.classList.remove('spinning'); showToast('Calls refreshed!'); }
+};
+
+// Inline audio player — toggles play/pause inside the card
+window.toggleCallAudio = function(btn, url) {
+  const card = btn.closest('.call-card');
+  let player = card.querySelector('.call-audio-player');
+
+  if (!player) {
+    player = document.createElement('div');
+    player.className = 'call-audio-player';
+    player.innerHTML = `<audio controls preload="none" style="width:100%;height:36px;outline:none" src="${url}"></audio>`;
+    card.appendChild(player);
+  }
+
+  const audio = player.querySelector('audio');
+  const playIcon  = btn.querySelector('.play-icon');
+  const pauseIcon = btn.querySelector('.pause-icon');
+  const label     = btn.querySelector('span');
+
+  if (audio.paused) {
+    // Pause any other playing audio first
+    document.querySelectorAll('.call-audio-player audio').forEach(a => {
+      if (a !== audio) {
+        a.pause();
+        const otherBtn = a.closest('.call-card').querySelector('.call-play');
+        if (otherBtn) {
+          otherBtn.querySelector('.play-icon').style.display  = '';
+          otherBtn.querySelector('.pause-icon').style.display = 'none';
+          otherBtn.querySelector('span').textContent = 'Play';
+        }
+      }
+    });
+    audio.play();
+    playIcon.style.display  = 'none';
+    pauseIcon.style.display = '';
+    label.textContent = 'Pause';
+    audio.onended = () => {
+      playIcon.style.display  = '';
+      pauseIcon.style.display = 'none';
+      label.textContent = 'Play';
+    };
+  } else {
+    audio.pause();
+    playIcon.style.display  = '';
+    pauseIcon.style.display = 'none';
+    label.textContent = 'Play';
+  }
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
