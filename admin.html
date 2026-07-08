@@ -523,6 +523,17 @@
         <textarea id="newBizDesc" placeholder="Brief description of your business…"></textarea>
       </div>
 
+      <div class="m-section">Subscription Plan</div>
+      <div class="m-field">
+        <label>Plan <span style="color:var(--danger)">*</span></label>
+        <select id="newPlan">
+          <option value="">Select a plan</option>
+          <option value="essential">Essential — $49/month · 80 minutes</option>
+          <option value="pro">Pro — $125/month · 250 minutes</option>
+          <option value="plus">Plus — $299/month · 700 minutes</option>
+        </select>
+      </div>
+
       <div class="m-section">Account Credentials</div>
       <div class="m-row">
         <div class="m-field">
@@ -758,12 +769,14 @@ document.getElementById('submitCreate').addEventListener('click', async () => {
   const bizName    = document.getElementById('newBizName').value.trim();
   const website    = document.getElementById('newWebsite').value.trim();
   const bizDesc    = document.getElementById('newBizDesc').value.trim();
+  const plan       = document.getElementById('newPlan').value;
   const pass       = document.getElementById('newPassword').value;
   const confirm    = document.getElementById('newPasswordConfirm').value;
   const btn        = document.getElementById('submitCreate');
   modalErr.textContent = '';
 
   if (!email)           { modalErr.textContent = 'Email is required.'; return; }
+  if (!plan)            { modalErr.textContent = 'Please select a plan.'; return; }
   if (!pass)            { modalErr.textContent = 'Password is required.'; return; }
   if (pass.length < 8)  { modalErr.textContent = 'Password must be at least 8 characters.'; return; }
   if (pass !== confirm)  { modalErr.textContent = 'Passwords do not match.'; return; }
@@ -785,6 +798,7 @@ document.getElementById('submitCreate').addEventListener('click', async () => {
         business_name: bizName || undefined,
         website:       website || undefined,
         business_description: bizDesc || undefined,
+        plan:          plan,
       }
     });
     if (error) throw error;

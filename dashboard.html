@@ -852,37 +852,44 @@
             <!-- Billing Tab -->
             <div class="acct-panel" id="panel-billing">
               <div class="card">
-                <div class="plan-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Growth Plan — Active</div>
-                <div class="form-section-title">Current Plan</div>
-                <div class="acct-form-grid" style="margin-bottom:20px">
+                <div class="plan-badge" id="planBadge" style="margin-bottom:16px">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  <span id="planBadgeText">Loading plan…</span>
+                </div>
+
+                <div class="form-section-title">Your Plan</div>
+                <div class="acct-form-grid" style="margin-bottom:24px">
                   <div class="card-sm">
                     <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Plan</div>
-                    <div style="font-size:15px;font-weight:700;color:#fff">Growth — Pay As You Go</div>
+                    <div style="font-size:15px;font-weight:700;color:#fff" id="planName">—</div>
                   </div>
                   <div class="card-sm">
-                    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Rate</div>
-                    <div style="font-size:15px;font-weight:700;color:var(--accent2)">$1 / minute</div>
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Monthly Price</div>
+                    <div style="font-size:15px;font-weight:700;color:var(--accent2)" id="planPrice">—</div>
                   </div>
                   <div class="card-sm">
-                    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Minutes This Month</div>
-                    <div style="font-size:15px;font-weight:700;color:#fff">47 min</div>
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Included Minutes</div>
+                    <div style="font-size:15px;font-weight:700;color:#fff" id="planMinutes">—</div>
                   </div>
                   <div class="card-sm">
-                    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Est. Bill</div>
-                    <div style="font-size:15px;font-weight:700;color:var(--accent2)">$47.00</div>
+                    <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Calls This Month</div>
+                    <div style="font-size:15px;font-weight:700;color:#fff" id="planCalls">—</div>
                   </div>
                 </div>
-                <div class="form-section-title">Payment Method</div>
-                <div style="display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;margin-bottom:14px">
-                  <span style="display:flex;align-items:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>
-                  <div>
-                    <div style="font-size:14px;font-weight:600;color:#fff">Visa ending in 4242</div>
-                    <div style="font-size:12px;color:var(--muted)">Expires 12/26</div>
-                  </div>
+
+                <div class="form-section-title">Minutes Usage — <span id="planMonth" style="font-weight:400;color:var(--muted);font-size:12px"></span></div>
+                <div style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:baseline">
+                  <span style="font-size:13px;color:var(--muted)">Used: <strong style="color:#fff" id="planUsed">0 min</strong></span>
+                  <span style="font-size:13px;color:var(--muted)">Remaining: <strong id="planRemaining" style="color:var(--success)">—</strong></span>
                 </div>
-                <div class="acct-actions">
-                  <button class="btn-save-acct" onclick="showToast('Billing portal opening…')">Manage Billing</button>
-                  <button class="btn-ghost-acct" onclick="showToast('Invoice downloaded!')">Download Invoice</button>
+                <div style="height:10px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;margin-bottom:8px">
+                  <div id="planProgressBar" style="height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,#4ef58a,#7ab4ff);transition:width .6s ease"></div>
+                </div>
+                <div style="font-size:11px;color:var(--muted);margin-bottom:20px" id="planOverageNote"></div>
+
+                <div style="display:flex;align-items:center;gap:8px;padding:12px 14px;background:rgba(247,217,161,0.05);border:1px solid rgba(247,217,161,0.12);border-radius:10px">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span style="font-size:12px;color:var(--muted)">Your plan is managed by your administrator. Contact support to upgrade.</span>
                 </div>
               </div>
             </div>

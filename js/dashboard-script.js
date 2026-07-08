@@ -582,32 +582,64 @@ window.toggleCallAudio = function(btn, url) {
 // ─────────────────────────────────────────────────────────────────────────────
 // USAGE — load from Supabase for account section
 // ─────────────────────────────────────────────────────────────────────────────
+const PLAN_CONFIG = {
+  essential: { name: 'Essential', price: 49,  minutes: 80 },
+  pro:       { name: 'Pro',       price: 125, minutes: 250 },
+  plus:      { name: 'Plus',      price: 299, minutes: 700 },
+};
+
 async function loadUsage(userId) {
   const month = new Date().toISOString().slice(0, 7);
-  const { data } = await _supabase
-    .from('usage_monthly')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('month', month)
-    .single();
+  const monthLabel = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-  if (!data) return;
+  const [{ data: usage }, { data: { user } }] = await Promise.all([
+    _supabase.from('usage_monthly').select('*').eq('user_id', userId).eq('month', month).single(),
+    _supabase.auth.getUser(),
+  ]);
 
-  const mins    = parseFloat(data.total_minutes || 0).toFixed(1);
-  const cost    = parseFloat(data.total_cost_usd || 0).toFixed(2);
-  const calls   = data.total_calls || 0;
+  const el = id => document.getElementById(id);
 
-  const minsEl = document.getElementById('minsUsed');
-  if (minsEl) minsEl.textContent = `${mins} min (${calls} calls)`;
+  const planKey = user?.user_metadata?.plan || '';
+  const plan    = PLAN_CONFIG[planKey];
 
-  const fillEl = document.querySelector('.usage-fill');
-  if (fillEl) {
-    const pct = Math.min(100, (parseFloat(mins) / 100) * 100);
-    fillEl.style.width = pct + '%';
+  if (el('planMonth')) el('planMonth').textContent = monthLabel;
+
+  if (!plan) {
+    if (el('planBadgeText')) el('planBadgeText').textContent = 'No plan assigned';
+    if (el('planName'))      el('planName').textContent      = 'Not assigned';
+    if (el('planPrice'))     el('planPrice').textContent     = '—';
+    if (el('planMinutes'))   el('planMinutes').textContent   = '—';
+    if (el('planOverageNote')) el('planOverageNote').textContent = 'Contact your administrator to assign a plan.';
+    return;
   }
 
-  const remainEl = document.querySelector('.usage-fill')?.closest('.usage-bar-wrap')?.nextElementSibling;
-  if (remainEl) remainEl.textContent = `Est. bill this month: $${cost}`;
+  const minsUsed      = parseFloat(usage?.total_minutes || 0);
+  const callsCount    = usage?.total_calls || 0;
+  const minsRemaining = Math.max(0, plan.minutes - minsUsed);
+  const pct           = Math.min(100, (minsUsed / plan.minutes) * 100);
+  const overLimit     = minsUsed > plan.minutes;
+
+  if (el('planBadgeText'))    el('planBadgeText').textContent    = `${plan.name} Plan — Active`;
+  if (el('planName'))         el('planName').textContent         = plan.name;
+  if (el('planPrice'))        el('planPrice').textContent        = `$${plan.price}/month`;
+  if (el('planMinutes'))      el('planMinutes').textContent      = `${plan.minutes} min`;
+  if (el('planCalls'))        el('planCalls').textContent        = `${callsCount} calls`;
+  if (el('planUsed'))         el('planUsed').textContent         = `${minsUsed.toFixed(1)} min`;
+  if (el('planRemaining'))  {
+    el('planRemaining').textContent = overLimit ? 'Over limit' : `${minsRemaining.toFixed(1)} min`;
+    el('planRemaining').style.color = overLimit ? 'var(--danger)' : 'var(--success)';
+  }
+  if (el('planProgressBar')) {
+    el('planProgressBar').style.width = pct + '%';
+    el('planProgressBar').style.background = overLimit
+      ? 'linear-gradient(90deg,#f87171,#f97316)'
+      : 'linear-gradient(90deg,#4ef58a,#7ab4ff)';
+  }
+  if (el('planOverageNote')) {
+    el('planOverageNote').textContent = overLimit
+      ? `You've used ${(minsUsed - plan.minutes).toFixed(1)} min over your ${plan.minutes}-min limit. Contact your administrator.`
+      : `${pct.toFixed(0)}% of your monthly minutes used.`;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
