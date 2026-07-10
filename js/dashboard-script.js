@@ -604,6 +604,10 @@ async function loadUsage(userId) {
   const planKey = user?.user_metadata?.plan || '';
   const plan    = PLAN_CONFIG[planKey];
 
+  // Cache metadata + refresh feature gates whenever the plan is (re)loaded
+  window._userMeta = user?.user_metadata || {};
+  applyPlanGates(planKey);
+
   if (el('planMonth')) el('planMonth').textContent = monthLabel;
 
   if (!plan) {
@@ -685,6 +689,33 @@ window.dashboardBoot = async function(userId) {
   window.deleteAppt      = deleteAppt;
   window.updateLeadStatus = updateLeadStatus;
   window.refreshPlanUsage = () => loadUsage(userId);
+  window.sendSms          = sendSms;
+  window.saveTransfer     = saveTransfer;
+  window.goToBilling      = goToBilling;
+
+  // Character counter for the SMS composer
+  const smsBody = document.getElementById('smsBody');
+  if (smsBody) {
+    smsBody.addEventListener('input', () => {
+      const c = document.getElementById('smsCharCount');
+      if (c) c.textContent = smsBody.value.length;
+    });
+  }
+  // When a lead is picked, fill the phone field
+  const smsLeadSelect = document.getElementById('smsLeadSelect');
+  if (smsLeadSelect) {
+    smsLeadSelect.addEventListener('change', () => {
+      const opt = smsLeadSelect.selectedOptions[0];
+      const num = opt ? opt.dataset.phone : '';
+      if (num) document.getElementById('smsToNumber').value = num;
+    });
+  }
+
+  // Lazy-load feature data when its section is first opened
+  window.onSectionEnter = (sec) => {
+    if (sec === 'sms')      { loadSmsRecipients(userId); loadSmsLog(userId); }
+    if (sec === 'transfer') { loadTransferSettings(); }
+  };
 
   // Load all data in parallel
   await Promise.all([
@@ -696,3 +727,213 @@ window.dashboardBoot = async function(userId) {
     loadUsage(userId),
   ]);
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PLAN GATING — feature access by subscription tier
+//   essential (1) < pro (2) < plus (3)
+//   Sections not listed in FEATURE_MIN_RANK are available on every plan.
+// ─────────────────────────────────────────────────────────────────────────────
+const PLAN_RANK = { essential: 1, pro: 2, plus: 3 };
+const FEATURE_MIN_RANK = {
+  appointments: 2,  // Pro & Plus
+  transfer:     3,  // Plus only
+  // sms — available on all plans (intentionally not gated)
+};
+const RANK_LABEL   = { 1: 'Essential', 2: 'Pro', 3: 'Plus' };
+const GATED_TITLES = { appointments: 'Appointments', transfer: 'Call Transfer' };
+
+const LOCK_SVG = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+const NAV_LOCK_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+
+function planRank(planKey) { return PLAN_RANK[planKey] || 0; }
+
+function featureUnlocked(section, planKey) {
+  const need = FEATURE_MIN_RANK[section];
+  return !need || planRank(planKey) >= need;
+}
+
+function applyPlanGates(planKey) {
+  window._userPlan = planKey || '';
+
+  Object.keys(FEATURE_MIN_RANK).forEach(section => {
+    const unlocked = featureUnlocked(section, planKey);
+
+    // Nav items (sidebar + mobile) — toggle locked styling
+    document.querySelectorAll(`[data-section="${section}"]`).forEach(btn => {
+      btn.classList.toggle('nav-locked', !unlocked);
+    });
+    // Lock icon only on the full sidebar nav item
+    document.querySelectorAll(`.nav-item[data-section="${section}"]`).forEach(btn => {
+      let lock = btn.querySelector('.nav-lock');
+      if (!unlocked && !lock) {
+        lock = document.createElement('span');
+        lock.className = 'nav-lock';
+        lock.innerHTML = NAV_LOCK_SVG;
+        btn.appendChild(lock);
+      } else if (unlocked && lock) {
+        lock.remove();
+      }
+    });
+
+    // Section overlay — visible but locked
+    const sec = document.getElementById(section);
+    if (!sec) return;
+    let overlay = sec.querySelector('.lock-overlay');
+    if (!unlocked) {
+      sec.classList.add('section-locked');
+      if (!overlay) sec.appendChild(buildLockOverlay(section));
+    } else {
+      sec.classList.remove('section-locked');
+      if (overlay) overlay.remove();
+    }
+  });
+}
+
+function buildLockOverlay(section) {
+  const planName = RANK_LABEL[FEATURE_MIN_RANK[section]];
+  const title    = GATED_TITLES[section] || 'This feature';
+  const div = document.createElement('div');
+  div.className = 'lock-overlay';
+  div.innerHTML = `
+    <div class="lock-card">
+      <div class="lock-emblem">${LOCK_SVG}</div>
+      <h3>${title} is a ${planName} feature</h3>
+      <p>Upgrade to the <strong>${planName}</strong> plan to unlock ${title.toLowerCase()}.</p>
+      <button class="lock-upgrade-btn" onclick="goToBilling()">Upgrade to ${planName}</button>
+    </div>`;
+  return div;
+}
+
+function goToBilling() {
+  const navBtn = document.querySelector('.nav-item[data-section="account"]');
+  if (navBtn) navBtn.click();
+  // Open the Billing tab within Account
+  const billingTab = document.querySelector('.acct-tab[data-tab="billing"]');
+  if (billingTab) billingTab.click();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SEND SMS — composer + outbox (drained by the Twilio backend worker)
+// ─────────────────────────────────────────────────────────────────────────────
+async function loadSmsRecipients(userId) {
+  const sel = document.getElementById('smsLeadSelect');
+  if (!sel || sel.dataset.loaded) return;
+  const { data: leads } = await _supabase
+    .from('leads').select('id, name, phone').eq('user_id', userId)
+    .not('phone', 'is', null).order('created_at', { ascending: false });
+
+  (leads || []).forEach(l => {
+    const opt = document.createElement('option');
+    opt.value = l.id;
+    opt.dataset.phone = l.phone;
+    opt.textContent = `${l.name || 'Unknown'} — ${l.phone}`;
+    sel.appendChild(opt);
+  });
+  sel.dataset.loaded = '1';
+}
+
+async function loadSmsLog(userId) {
+  const box = document.getElementById('smsLog');
+  if (!box) return;
+  const { data: msgs } = await _supabase
+    .from('sms_messages').select('*').eq('user_id', userId)
+    .order('created_at', { ascending: false }).limit(20);
+
+  if (!msgs || msgs.length === 0) {
+    box.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:24px;text-align:center">No messages yet.</p>';
+    return;
+  }
+  box.innerHTML = msgs.map(m => `
+    <div class="sms-log-item">
+      <div style="min-width:0">
+        <div class="sms-log-to">${escapeHtml(m.to_number)}</div>
+        <div class="sms-log-body">${escapeHtml(m.body)}</div>
+        <div class="sms-log-time">${fmtDate(m.created_at)}</div>
+      </div>
+      <span class="sms-status ${m.status}">${m.status}</span>
+    </div>`).join('');
+}
+
+async function sendSms() {
+  const userId = window._currentUserId;
+  const errEl  = document.getElementById('smsErr');
+  const btn    = document.getElementById('smsSendBtn');
+  const leadId = document.getElementById('smsLeadSelect').value || null;
+  const to     = document.getElementById('smsToNumber').value.trim();
+  const body   = document.getElementById('smsBody').value.trim();
+  errEl.textContent = '';
+
+  if (!to)   { errEl.textContent = 'Enter a phone number (or pick a lead).'; return; }
+  if (!body) { errEl.textContent = 'Message cannot be empty.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  try {
+    const { error } = await _supabase.from('sms_messages').insert({
+      user_id: userId, lead_id: leadId, to_number: to, body, status: 'queued',
+    });
+    if (error) throw error;
+    document.getElementById('smsBody').value = '';
+    document.getElementById('smsCharCount').textContent = '0';
+    document.getElementById('smsToNumber').value = '';
+    document.getElementById('smsLeadSelect').value = '';
+    if (window.showToast) window.showToast('Message queued for delivery!');
+    await loadSmsLog(userId);
+  } catch (err) {
+    errEl.textContent = err.message || 'Failed to queue message.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send Message';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TRANSFER CALLS — persists to the user's auth metadata (Plus only)
+// ─────────────────────────────────────────────────────────────────────────────
+function loadTransferSettings() {
+  const meta = window._userMeta || {};
+  const numEl  = document.getElementById('transferNumber');
+  const modeEl = document.getElementById('transferMode');
+  if (numEl)  numEl.value  = meta.transfer_number || '';
+  if (modeEl) modeEl.value = meta.transfer_mode || 'on_request';
+}
+
+async function saveTransfer() {
+  const errEl   = document.getElementById('transferErr');
+  const savedEl = document.getElementById('transferSaved');
+  const btn     = document.getElementById('transferSaveBtn');
+  const number  = document.getElementById('transferNumber').value.trim();
+  const mode    = document.getElementById('transferMode').value;
+  errEl.textContent = '';
+  savedEl.textContent = '';
+
+  if (mode !== 'off' && !number) {
+    errEl.textContent = 'Enter a transfer number, or set “When to Transfer” to Never.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    const existing = window._userMeta || {};
+    const { data, error } = await _supabase.auth.updateUser({
+      data: { ...existing, transfer_number: number, transfer_mode: mode },
+    });
+    if (error) throw error;
+    window._userMeta = data.user.user_metadata || {};
+    savedEl.textContent = 'Saved ✓';
+    if (window.showToast) window.showToast('Transfer settings saved!');
+    setTimeout(() => { savedEl.textContent = ''; }, 4000);
+  } catch (err) {
+    errEl.textContent = err.message || 'Failed to save.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save Transfer Settings';
+  }
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, c => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+  ));
+}
