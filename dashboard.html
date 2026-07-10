@@ -243,23 +243,44 @@
     @media (max-width: 900px) { .sms-grid { grid-template-columns: 1fr; } }
 
     /* ── CALENDAR ── */
-    .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 14px; }
-    .calendar-nav-btn { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); color: var(--muted2); font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
-    .calendar-nav-btn:hover { background: rgba(255,255,255,0.07); color: #fff; }
-    .calendar-title { font-size: 16px; font-weight: 700; color: #fff; min-width: 180px; text-align: center; }
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.07); margin-bottom: 20px; }
-    .calendar-day-header { background: rgba(255,255,255,0.04); padding: 12px 8px; text-align: center; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .calendar-day { background: rgba(13,17,32,0.5); padding: 10px 8px; min-height: 100px; position: relative; }
-    .calendar-day.other-month { opacity: 0.4; }
-    .calendar-day.today { background: rgba(247,217,161,0.06); border: 1px solid rgba(247,217,161,0.15); }
-    .calendar-date { font-size: 12px; font-weight: 600; color: var(--muted2); margin-bottom: 6px; }
+    .calendar-container { display: flex; flex-direction: column; gap: 24px; }
+    .calendar-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .calendar-nav-group { display: flex; align-items: center; gap: 12px; }
+    .calendar-nav-btn { background: linear-gradient(135deg, rgba(247,217,161,0.08), rgba(242,185,184,0.04)); border: 1px solid rgba(247,217,161,0.15); color: var(--accent2); font-size: 13px; font-weight: 600; padding: 9px 16px; border-radius: 9px; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 6px; }
+    .calendar-nav-btn:hover { background: linear-gradient(135deg, rgba(247,217,161,0.12), rgba(242,185,184,0.08)); border-color: rgba(247,217,161,0.25); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(247,217,161,0.1); }
+    .calendar-nav-btn svg { width: 16px; height: 16px; }
+    .calendar-title { font-size: 18px; font-weight: 700; color: #fff; min-width: 200px; text-align: center; }
+    .calendar-legend { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; justify-content: flex-end; }
+    .calendar-legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted2); font-weight: 500; }
+    .calendar-legend-dot { width: 12px; height: 12px; border-radius: 6px; }
+    .calendar-legend-dot.confirmed { background: var(--success); }
+    .calendar-legend-dot.pending { background: var(--accent2); }
+    .calendar-legend-dot.cancelled { background: var(--danger); }
+
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+    .calendar-day-header { text-align: center; padding: 12px 4px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+    .calendar-day { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 11px; padding: 12px; min-height: 130px; position: relative; display: flex; flex-direction: column; transition: all 0.2s; }
+    .calendar-day:hover { border-color: rgba(247,217,161,0.2); background: rgba(255,255,255,0.04); }
+    .calendar-day.other-month { opacity: 0.3; background: transparent; border-color: transparent; }
+    .calendar-day.other-month:hover { border-color: transparent; background: transparent; }
+    .calendar-day.today { background: linear-gradient(135deg, rgba(247,217,161,0.08), rgba(242,185,184,0.04)); border-color: rgba(247,217,161,0.25); box-shadow: 0 0 0 1px rgba(247,217,161,0.1) inset; }
+    .calendar-date { font-size: 13px; font-weight: 700; color: var(--muted2); margin-bottom: 8px; }
     .calendar-date.today { color: var(--accent2); }
-    .calendar-events { display: flex; flex-direction: column; gap: 3px; font-size: 10px; }
-    .calendar-event { background: rgba(78,245,138,0.12); color: var(--success); padding: 3px 5px; border-radius: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; transition: all 0.2s; }
-    .calendar-event:hover { background: rgba(78,245,138,0.2); }
-    .calendar-event.pending { background: rgba(247,217,161,0.12); color: var(--accent2); }
-    .calendar-event.cancelled { background: rgba(248,113,113,0.12); color: var(--danger); text-decoration: line-through; }
-    @media (max-width: 900px) { .calendar-grid { grid-template-columns: repeat(7, 1fr); } .calendar-day { min-height: 70px; font-size: 9px; } }
+    .calendar-events { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+    .calendar-event { background: rgba(78,245,138,0.12); color: var(--success); padding: 6px 8px; border-radius: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; transition: all 0.2s; font-size: 11px; font-weight: 500; border: 0.5px solid rgba(78,245,138,0.2); }
+    .calendar-event:hover { background: rgba(78,245,138,0.18); border-color: rgba(78,245,138,0.35); transform: translateY(-1px); box-shadow: 0 2px 8px rgba(78,245,138,0.12); }
+    .calendar-event.pending { background: rgba(247,217,161,0.12); color: var(--accent2); border-color: rgba(247,217,161,0.2); }
+    .calendar-event.pending:hover { background: rgba(247,217,161,0.18); border-color: rgba(247,217,161,0.35); box-shadow: 0 2px 8px rgba(247,217,161,0.12); }
+    .calendar-event.cancelled { background: rgba(248,113,113,0.12); color: var(--danger); border-color: rgba(248,113,113,0.2); text-decoration: line-through; opacity: 0.8; }
+    .calendar-event.cancelled:hover { background: rgba(248,113,113,0.18); border-color: rgba(248,113,113,0.35); box-shadow: 0 2px 8px rgba(248,113,113,0.12); }
+    .calendar-event-time { display: block; font-size: 10px; opacity: 0.85; margin-top: 2px; }
+
+    @media (max-width: 900px) {
+      .calendar-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .calendar-legend { justify-content: flex-start; }
+      .calendar-day { min-height: 100px; padding: 8px; font-size: 12px; }
+      .calendar-event { font-size: 10px; padding: 5px 6px; }
+    }
     .btn-ghost-acct:hover { color: #fff; background: rgba(255,255,255,0.07); }
     .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
     .toggle-row:last-child { border-bottom: none; }
@@ -791,17 +812,38 @@
           <h2>Appointment Calendar</h2>
           <p>Visual view of all your scheduled appointments</p>
         </div>
-        <div class="card" style="padding:24px">
-          <div class="calendar-header">
-            <button class="calendar-nav-btn" id="calPrevBtn">← Prev</button>
-            <div class="calendar-title" id="calMonthYear">January 2026</div>
-            <button class="calendar-nav-btn" id="calNextBtn">Next →</button>
-          </div>
-          <div class="calendar-grid" id="calendarGrid"></div>
-          <div style="font-size:12px;color:var(--muted);line-height:1.6">
-            <div style="margin-bottom:8px"><span style="display:inline-block;width:16px;height:16px;background:rgba(78,245,138,0.12);border-radius:3px;margin-right:8px"></span> Confirmed</div>
-            <div style="margin-bottom:8px"><span style="display:inline-block;width:16px;height:16px;background:rgba(247,217,161,0.12);border-radius:3px;margin-right:8px"></span> Pending</div>
-            <div><span style="display:inline-block;width:16px;height:16px;background:rgba(248,113,113,0.12);border-radius:3px;margin-right:8px"></span> Cancelled</div>
+        <div class="card" style="padding:28px">
+          <div class="calendar-container">
+            <div class="calendar-header">
+              <div class="calendar-nav-group">
+                <button class="calendar-nav-btn" id="calPrevBtn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                  Previous
+                </button>
+              </div>
+              <div class="calendar-title" id="calMonthYear">January 2026</div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <div class="calendar-legend">
+                  <div class="calendar-legend-item">
+                    <div class="calendar-legend-dot confirmed"></div>
+                    <span>Confirmed</span>
+                  </div>
+                  <div class="calendar-legend-item">
+                    <div class="calendar-legend-dot pending"></div>
+                    <span>Pending</span>
+                  </div>
+                  <div class="calendar-legend-item">
+                    <div class="calendar-legend-dot cancelled"></div>
+                    <span>Cancelled</span>
+                  </div>
+                </div>
+                <button class="calendar-nav-btn" id="calNextBtn">
+                  Next
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
           </div>
         </div>
       </section>

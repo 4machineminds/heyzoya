@@ -1023,14 +1023,26 @@ function renderCalendar() {
       const eventsList = document.createElement('div');
       eventsList.className = 'calendar-events';
 
-      dayAppts.forEach(appt => {
+      dayAppts.slice(0, 3).forEach(appt => {
         const eventEl = document.createElement('div');
         eventEl.className = `calendar-event ${appt.status}`;
-        eventEl.title = `${appt.client_name || 'Appointment'} - ${appt.appt_time || ''}`;
-        const label = appt.client_name || 'Appt';
-        eventEl.textContent = `${label.substring(0, 12)}${label.length > 12 ? '…' : ''}`;
+        const name = appt.client_name || 'Appointment';
+        const time = appt.appt_time ? ` @ ${appt.appt_time.substring(0, 5)}` : '';
+        eventEl.title = `${name}${time}`;
+        const displayName = name.substring(0, 10);
+        eventEl.innerHTML = `<strong>${displayName}${name.length > 10 ? '…' : ''}</strong>` +
+          (time ? `<span class="calendar-event-time">${appt.appt_time.substring(0, 5)}</span>` : '');
         eventsList.appendChild(eventEl);
       });
+
+      if (dayAppts.length > 3) {
+        const moreEl = document.createElement('div');
+        moreEl.style.fontSize = '10px';
+        moreEl.style.color = 'var(--muted)';
+        moreEl.style.paddingTop = '2px';
+        moreEl.textContent = `+${dayAppts.length - 3} more`;
+        eventsList.appendChild(moreEl);
+      }
 
       dayDiv.appendChild(eventsList);
     }
