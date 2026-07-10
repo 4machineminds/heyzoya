@@ -583,9 +583,10 @@ window.toggleCallAudio = function(btn, url) {
 // USAGE — load from Supabase for account section
 // ─────────────────────────────────────────────────────────────────────────────
 const PLAN_CONFIG = {
-  essential: { name: 'Essential', price: 49,  minutes: 80 },
-  pro:       { name: 'Pro',       price: 125, minutes: 250 },
-  plus:      { name: 'Plus',      price: 299, minutes: 700 },
+  free:      { name: 'Free Trial', price: 0,   minutes: 20 },
+  essential: { name: 'Essential',  price: 49,  minutes: 80 },
+  pro:       { name: 'Pro',        price: 125, minutes: 250 },
+  plus:      { name: 'Plus',       price: 299, minutes: 700 },
 };
 
 async function loadUsage(userId) {
