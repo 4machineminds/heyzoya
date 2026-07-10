@@ -715,6 +715,7 @@ window.dashboardBoot = async function(userId) {
   window.onSectionEnter = (sec) => {
     if (sec === 'sms')      { loadSmsRecipients(userId); loadSmsLog(userId); }
     if (sec === 'transfer') { loadTransferSettings(); }
+    if (sec === 'calendar') { initCalendar(userId); }
   };
 
   // Load all data in parallel
@@ -936,4 +937,114 @@ function escapeHtml(str) {
   return String(str || '').replace(/[&<>"']/g, c => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
   ));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CALENDAR — month view of all appointments
+// ─────────────────────────────────────────────────────────────────────────────
+let _calendarDate = new Date();
+let _calendarAppts = [];
+
+async function initCalendar(userId) {
+  if (document.getElementById('calPrevBtn').dataset.loaded) return; // Already wired
+
+  const { data: appts } = await _supabase
+    .from('appointments').select('*').eq('user_id', userId).order('appt_date', { ascending: true });
+
+  _calendarAppts = appts || [];
+  _calendarDate = new Date();
+
+  // Wire month nav
+  document.getElementById('calPrevBtn').addEventListener('click', () => {
+    _calendarDate.setMonth(_calendarDate.getMonth() - 1);
+    renderCalendar();
+  });
+  document.getElementById('calNextBtn').addEventListener('click', () => {
+    _calendarDate.setMonth(_calendarDate.getMonth() + 1);
+    renderCalendar();
+  });
+  document.getElementById('calPrevBtn').dataset.loaded = '1';
+
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const year = _calendarDate.getFullYear();
+  const month = _calendarDate.getMonth();
+
+  // Update month/year title
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+  document.getElementById('calMonthYear').textContent = `${monthNames[month]} ${year}`;
+
+  // Day headers (Sun–Sat)
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = '';
+
+  dayNames.forEach(name => {
+    const header = document.createElement('div');
+    header.className = 'calendar-day-header';
+    header.textContent = name;
+    grid.appendChild(header);
+  });
+
+  // Get first day of month and total days
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+  // Previous month padding
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'calendar-day other-month';
+    dayDiv.innerHTML = `<div class="calendar-date">${daysInPrevMonth - i}</div>`;
+    grid.appendChild(dayDiv);
+  }
+
+  // Current month days
+  const today = new Date();
+  const isThisMonth = today.getFullYear() === year && today.getMonth() === month;
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'calendar-day';
+
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const isToday = isThisMonth && today.getDate() === day;
+
+    if (isToday) dayDiv.classList.add('today');
+
+    dayDiv.innerHTML = `<div class="calendar-date ${isToday ? 'today' : ''}">${day}</div>`;
+
+    // Find appointments for this date
+    const dayAppts = _calendarAppts.filter(a => a.appt_date === dateStr);
+    if (dayAppts.length > 0) {
+      const eventsList = document.createElement('div');
+      eventsList.className = 'calendar-events';
+
+      dayAppts.forEach(appt => {
+        const eventEl = document.createElement('div');
+        eventEl.className = `calendar-event ${appt.status}`;
+        eventEl.title = `${appt.client_name || 'Appointment'} - ${appt.appt_time || ''}`;
+        const label = appt.client_name || 'Appt';
+        eventEl.textContent = `${label.substring(0, 12)}${label.length > 12 ? '…' : ''}`;
+        eventsList.appendChild(eventEl);
+      });
+
+      dayDiv.appendChild(eventsList);
+    }
+
+    grid.appendChild(dayDiv);
+  }
+
+  // Next month padding
+  const totalCells = firstDay + daysInMonth;
+  const remainingCells = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remainingCells; i++) {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'calendar-day other-month';
+    dayDiv.innerHTML = `<div class="calendar-date">${i}</div>`;
+    grid.appendChild(dayDiv);
+  }
 }
