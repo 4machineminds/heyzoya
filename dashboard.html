@@ -739,13 +739,13 @@
             <div class="profile-avatar" id="acctAvatarInitial">U</div>
             <div class="profile-name" id="acctName">User</div>
             <div class="profile-email" id="acctEmail">user@example.com</div>
-            <div class="profile-badge">✦ Growth Plan</div>
+            <div class="profile-badge" id="profilePlanBadge">✦ Loading…</div>
             <div style="margin-top:20px;text-align:left">
               <div class="usage-bar-wrap">
-                <div class="usage-bar-label"><span>Minutes Used</span><span id="minsUsed">47 / 100</span></div>
-                <div class="usage-bar"><div class="usage-fill" style="width:47%"></div></div>
+                <div class="usage-bar-label"><span>Minutes Used</span><span id="minsUsed">—</span></div>
+                <div class="usage-bar"><div class="usage-fill" id="minsUsedFill" style="width:0%"></div></div>
               </div>
-              <div style="font-size:12px;color:var(--muted);margin-top:6px">53 minutes remaining this month</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px" id="minsRemainingNote"></div>
             </div>
           </div>
 
@@ -1020,7 +1020,7 @@
 <div class="toast" id="toast">✓ <span id="toastMsg">Saved!</span></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/dashboard-script.js"></script>
+<script src="js/dashboard-script.js?v=2"></script>
 <script>
   const { createClient } = supabase;
   const _supabase = createClient(

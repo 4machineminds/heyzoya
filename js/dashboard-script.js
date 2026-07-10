@@ -612,6 +612,10 @@ async function loadUsage(userId) {
     if (el('planPrice'))     el('planPrice').textContent     = '—';
     if (el('planMinutes'))   el('planMinutes').textContent   = '—';
     if (el('planOverageNote')) el('planOverageNote').textContent = 'Contact your administrator to assign a plan.';
+    if (el('profilePlanBadge')) el('profilePlanBadge').textContent = '✦ No Plan';
+    if (el('minsUsed'))         el('minsUsed').textContent         = '—';
+    if (el('minsUsedFill'))     el('minsUsedFill').style.width     = '0%';
+    if (el('minsRemainingNote')) el('minsRemainingNote').textContent = 'No plan assigned yet.';
     return;
   }
 
@@ -641,6 +645,16 @@ async function loadUsage(userId) {
     el('planOverageNote').textContent = overLimit
       ? `You've used ${(minsUsed - plan.minutes).toFixed(1)} min over your ${plan.minutes}-min limit. Contact your administrator.`
       : `${pct.toFixed(0)}% of your monthly minutes used.`;
+  }
+
+  // Profile card (Account section sidebar)
+  if (el('profilePlanBadge')) el('profilePlanBadge').textContent = `✦ ${plan.name} Plan`;
+  if (el('minsUsed'))         el('minsUsed').textContent         = `${minsUsed.toFixed(1)} / ${plan.minutes}`;
+  if (el('minsUsedFill'))     el('minsUsedFill').style.width     = pct + '%';
+  if (el('minsRemainingNote')) {
+    el('minsRemainingNote').textContent = overLimit
+      ? 'Monthly limit exceeded'
+      : `${minsRemaining.toFixed(1)} minutes remaining this month`;
   }
 }
 
