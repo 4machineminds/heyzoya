@@ -529,6 +529,7 @@
         <label>Plan <span style="color:var(--danger)">*</span></label>
         <select id="newPlan">
           <option value="">Select a plan</option>
+          <option value="free">Free Trial — $0/month · 20 minutes</option>
           <option value="essential">Essential — $49/month · 80 minutes</option>
           <option value="pro">Pro — $125/month · 250 minutes</option>
           <option value="plus">Plus — $299/month · 700 minutes</option>
@@ -618,6 +619,7 @@
         <label>Plan</label>
         <select id="editPlan">
           <option value="">No plan assigned</option>
+          <option value="free">Free Trial — $0/month · 20 minutes</option>
           <option value="essential">Essential — $49/month · 80 minutes</option>
           <option value="pro">Pro — $125/month · 250 minutes</option>
           <option value="plus">Plus — $299/month · 700 minutes</option>
@@ -783,8 +785,8 @@ function renderTable(users) {
       ? `<span class="badge active"><span class="badge-dot"></span>${phone.phone_number}</span>`
       : `<button class="btn-assign" onclick="openAssign('${u.id}','${esc(u.email)}')">+ Assign Zoya</button>`;
     const planKey = u.user_metadata?.plan || '';
-    const planLabels = { essential: 'Essential', pro: 'Pro', plus: 'Plus' };
-    const planColors = { essential: '#7ab4ff', pro: '#f7d9a1', plus: '#f2b9b8' };
+    const planLabels = { free: 'Free Trial', essential: 'Essential', pro: 'Pro', plus: 'Plus' };
+    const planColors = { free: '#4ef58a', essential: '#7ab4ff', pro: '#f7d9a1', plus: '#f2b9b8' };
     const planCell = planKey
       ? `<span style="font-size:11px;font-weight:700;color:${planColors[planKey]};background:${planColors[planKey]}18;border:1px solid ${planColors[planKey]}30;border-radius:6px;padding:3px 8px">${planLabels[planKey]}</span>`
       : `<span style="font-size:11px;color:var(--muted)">—</span>`;
