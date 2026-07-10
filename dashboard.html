@@ -502,6 +502,57 @@
       .calendar-day { min-height: 100px; padding: 8px; font-size: 12px; }
       .calendar-event { font-size: 10px; padding: 5px 6px; }
     }
+
+    /* ── CALENDAR MOBILE ── */
+    @media (max-width: 640px) {
+      .calendar-container { gap: 16px; }
+
+      /* Header: stacks nav row + legend row */
+      .calendar-header {
+        flex-direction: column; align-items: stretch; gap: 10px; padding-bottom: 14px;
+      }
+      .calendar-nav-group { justify-content: space-between; }
+      .calendar-title { font-size: 15px; min-width: 0; text-align: center; flex: 1; }
+      .calendar-nav-btn { font-size: 12px; padding: 7px 12px; }
+      .calendar-nav-btn svg { width: 14px; height: 14px; }
+      .calendar-legend { justify-content: center; gap: 12px; flex-wrap: wrap; }
+      .calendar-legend-item { font-size: 11px; }
+      .calendar-legend-dot { width: 9px; height: 9px; }
+
+      /* Grid: tighter gap, no min-height, tiny padding */
+      .calendar-grid { gap: 3px; }
+      .calendar-day-header {
+        font-size: 9px; padding: 6px 1px; letter-spacing: 0;
+      }
+      .calendar-day {
+        min-height: 54px; padding: 5px 4px; border-radius: 8px;
+        border-width: 1px;
+      }
+      .calendar-day.other-month { opacity: 0.2; }
+      .calendar-date {
+        font-size: 11px; font-weight: 700; margin-bottom: 3px; line-height: 1;
+      }
+      /* Dot indicator for events instead of text pills */
+      .calendar-events { gap: 2px; }
+      .calendar-event {
+        font-size: 0; /* hide text — show as dot */
+        padding: 0; width: 6px; height: 6px;
+        border-radius: 50%; border: none;
+        display: inline-block; margin-right: 2px;
+        transform: none !important; box-shadow: none !important;
+      }
+      .calendar-event.pending  { background: var(--accent2); }
+      .calendar-event.cancelled { background: var(--danger); text-decoration: none; opacity: 1; }
+      /* Row of dots */
+      .calendar-events { flex-direction: row; flex-wrap: wrap; align-items: center; padding-top: 1px; }
+      .calendar-event-time { display: none; }
+    }
+
+    @media (max-width: 380px) {
+      .calendar-day { min-height: 46px; padding: 4px 3px; }
+      .calendar-date { font-size: 10px; }
+      .calendar-day-header { font-size: 8px; }
+    }
     .btn-ghost-acct:hover { color: #fff; background: rgba(255,255,255,0.07); }
     .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
     .toggle-row:last-child { border-bottom: none; }
