@@ -716,7 +716,7 @@ window.dashboardBoot = async function(userId) {
   window.onSectionEnter = (sec) => {
     if (sec === 'sms')      { loadSmsRecipients(userId); loadSmsLog(userId); }
     if (sec === 'transfer') { loadTransferSettings(); }
-    if (sec === 'calendar') { initCalendar(userId); }
+    if (sec === 'appointments') { initCalendar(userId); }
   };
 
   // Load all data in parallel
