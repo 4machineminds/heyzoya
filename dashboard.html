@@ -665,47 +665,80 @@
       .call-meta { flex-direction: row; align-items: center; grid-column: 1 / -1; }
     }
 
-    /* MOBILE BOTTOM NAV */
-    .mobile-nav {
-      display: none;
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
-      background: rgba(10,12,22,0.92);
-      backdrop-filter: blur(24px) saturate(1.4); -webkit-backdrop-filter: blur(24px) saturate(1.4);
-      border-top: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 -8px 32px rgba(0,0,0,0.45);
-      padding: 6px 6px max(6px, env(safe-area-inset-bottom));
+    /* MOBILE BOTTOM NAV — replaced by bottom-pill-nav */
+    .mobile-nav { display: none !important; }
+
+    /* ── BOTTOM PILL NAV ── */
+    .sidebar { display: none !important; }
+    .main-content { margin-left: 0 !important; padding-bottom: 90px; }
+    .menu-toggle { display: none !important; }
+
+    .bottom-pill-nav {
+      position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+      z-index: 300;
+      display: flex; align-items: center; gap: 2px;
+      background: rgba(12, 14, 26, 0.90);
+      backdrop-filter: blur(28px) saturate(1.6); -webkit-backdrop-filter: blur(28px) saturate(1.6);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 999px;
+      padding: 5px 6px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+      max-width: calc(100vw - 24px);
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
-    .mobile-nav-inner { display: flex; justify-content: space-around; align-items: stretch; gap: 2px; }
-    .mobile-nav-btn {
-      position: relative; flex: 1; min-width: 0;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-      background: none; border: none; color: var(--muted); font-size: 10px;
-      font-weight: 600; letter-spacing: 0.2px; padding: 8px 2px 6px; border-radius: 14px;
-      cursor: pointer; font-family: 'DM Sans', sans-serif;
-      transition: color 0.25s ease, background 0.25s ease, transform 0.15s ease;
+    .bottom-pill-nav::-webkit-scrollbar { display: none; }
+
+    .bpn-brand {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 14px 6px 8px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      margin-right: 4px; flex-shrink: 0;
+    }
+    .bpn-brand img { width: 30px; height: 30px; border-radius: 9px; object-fit: cover; }
+    .bpn-brand-name { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; }
+
+    .bpn-btn {
+      display: flex; align-items: center; gap: 0;
+      padding: 8px 10px; border-radius: 999px;
+      border: none; background: none;
+      color: rgba(255,255,255,0.45);
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s ease;
+      font-family: 'DM Sans', sans-serif;
+      white-space: nowrap; flex-shrink: 0;
       -webkit-tap-highlight-color: transparent;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .mobile-nav-btn:active { transform: scale(0.92); }
-    .mobile-nav-btn svg { display: block; transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    /* Active tab: pill highlight + accent bar on top + icon lift */
-    .mobile-nav-btn.active {
-      color: var(--accent2);
-      background: linear-gradient(180deg, rgba(247,217,161,0.14), rgba(242,185,184,0.05));
+    .bpn-btn svg { flex-shrink: 0; transition: stroke 0.2s; }
+    .bpn-btn .bpn-label { max-width: 0; overflow: hidden; opacity: 0; transition: max-width 0.25s ease, opacity 0.2s ease, margin 0.25s ease; margin-left: 0; }
+    .bpn-btn:hover { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.06); }
+    .bpn-btn.active {
+      background: #fff; color: #0a0c16; font-weight: 700; padding: 8px 16px;
     }
-    .mobile-nav-btn.active svg {
-      transform: translateY(-1px) scale(1.08);
-      filter: drop-shadow(0 0 8px rgba(247,217,161,0.55));
+    .bpn-btn.active svg { stroke: #0a0c16; }
+    .bpn-btn.active .bpn-label { max-width: 120px; opacity: 1; margin-left: 6px; }
+    .bpn-btn.nav-locked { opacity: 0.4; }
+
+    .bpn-right {
+      display: flex; align-items: center; gap: 2px;
+      padding-left: 6px; border-left: 1px solid rgba(255,255,255,0.08);
+      margin-left: 4px; flex-shrink: 0;
     }
-    .mobile-nav-btn.active::before {
-      content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-      width: 22px; height: 3px; border-radius: 0 0 4px 4px;
-      background: linear-gradient(90deg, var(--accent1), var(--accent2));
-      box-shadow: 0 2px 8px rgba(247,217,161,0.5);
+    .bpn-logout {
+      display: flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px; border-radius: 50%;
+      border: none; background: rgba(248,113,113,0.08);
+      color: var(--danger); cursor: pointer; transition: all 0.2s; flex-shrink: 0;
     }
-    /* Locked (plan-gated) tabs look dimmed */
-    .mobile-nav-btn.nav-locked { opacity: 0.45; }
-    @media (max-width: 640px) { .mobile-nav { display: block; } }
+    .bpn-logout:hover { background: rgba(248,113,113,0.18); }
+
+    @media (max-width: 480px) {
+      .bpn-brand-name { display: none; }
+      .bpn-brand { padding: 6px 10px 6px 6px; }
+      .bpn-btn { padding: 8px 9px; }
+      .bpn-btn.active { padding: 8px 13px; }
+      .bottom-pill-nav { bottom: 10px; }
+    }
 
     /* SIDEBAR OVERLAY */
     .sidebar-overlay {
@@ -1390,28 +1423,45 @@
   </div>
 </div>
 
-<!-- MOBILE BOTTOM NAV -->
-<nav class="mobile-nav" id="mobileNav">
-  <div class="mobile-nav-inner">
-    <button class="mobile-nav-btn active" data-section="overview">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
-      Overview
+<!-- BOTTOM PILL NAV -->
+<nav class="bottom-pill-nav" id="bottomPillNav">
+  <div class="bpn-brand">
+    <img src="assets/images/heyzoya.png" alt="HeyZoya">
+    <span class="bpn-brand-name">HeyZoya</span>
+  </div>
+
+  <button class="bpn-btn active" data-section="overview">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+    <span class="bpn-label">Overview</span>
+  </button>
+  <button class="bpn-btn" data-section="leads">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    <span class="bpn-label">Leads</span>
+  </button>
+  <button class="bpn-btn" data-section="calls">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.4 2 2 0 0 1 3.62 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.97-.97a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    <span class="bpn-label">Calls</span>
+  </button>
+  <button class="bpn-btn" data-section="appointments">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span class="bpn-label">Appointments</span>
+  </button>
+  <button class="bpn-btn" data-section="sms">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span class="bpn-label">SMS</span>
+  </button>
+  <button class="bpn-btn" data-section="transfer">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="19 1 23 5 19 9"/><line x1="15" y1="5" x2="23" y2="5"/><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.4 2 2 0 0 1 3.62 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.97-.97a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    <span class="bpn-label">Transfer</span>
+  </button>
+
+  <div class="bpn-right">
+    <button class="bpn-btn" data-section="account">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <span class="bpn-label">Account</span>
     </button>
-    <button class="mobile-nav-btn" data-section="calls">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.4 2 2 0 0 1 3.62 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.97-.97a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-      Calls
-    </button>
-    <button class="mobile-nav-btn" data-section="appointments">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      Appts
-    </button>
-    <button class="mobile-nav-btn" data-section="sms">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      SMS
-    </button>
-    <button class="mobile-nav-btn" data-section="account">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-      Account
+    <button class="bpn-logout" id="bpnLogoutBtn" title="Logout">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     </button>
   </div>
 </nav>
@@ -1447,11 +1497,15 @@
   function switchSection(sec) {
     document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.section === sec));
     document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.section === sec));
+    document.querySelectorAll('.bpn-btn').forEach(b => b.classList.toggle('active', b.dataset.section === sec));
     sections.forEach(s => { const el = document.getElementById(s); if (el) el.classList.toggle('active', s === sec); });
     document.getElementById('pageTitle').textContent = pageTitles[sec] || sec;
     if (sec === 'account' && window.refreshPlanUsage) window.refreshPlanUsage();
     if (window.onSectionEnter) window.onSectionEnter(sec);
   }
+  document.querySelectorAll('.bpn-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchSection(btn.dataset.section));
+  });
   document.querySelectorAll('.nav-item').forEach(btn => {
     btn.addEventListener('click', () => {
       switchSection(btn.dataset.section);
@@ -1490,10 +1544,12 @@
   });
 
   // ── LOGOUT ──
-  document.getElementById('logoutBtn').addEventListener('click', async () => {
+  async function doLogout() {
     await _supabase.auth.signOut();
     window.location.href = 'login.html';
-  });
+  }
+  document.getElementById('logoutBtn').addEventListener('click', doLogout);
+  document.getElementById('bpnLogoutBtn').addEventListener('click', doLogout);
 
   // ── AUTH + BOOT ──
   let currentUser = null;
