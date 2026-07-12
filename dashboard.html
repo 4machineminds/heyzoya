@@ -732,12 +732,31 @@
     }
     .bpn-logout:hover { background: rgba(248,113,113,0.18); }
 
-    @media (max-width: 480px) {
+    /* Mobile: stretch pill full-width, icon-only */
+    @media (max-width: 768px) {
+      .bottom-pill-nav {
+        left: 12px; right: 12px; bottom: 12px;
+        transform: none;
+        max-width: none;
+        justify-content: space-between;
+        padding: 5px 8px;
+      }
       .bpn-brand-name { display: none; }
-      .bpn-brand { padding: 6px 10px 6px 6px; }
-      .bpn-btn { padding: 8px 9px; }
-      .bpn-btn.active { padding: 8px 13px; }
-      .bottom-pill-nav { bottom: 10px; }
+      .bpn-brand { padding: 4px 10px 4px 4px; gap: 0; }
+      .bpn-brand img { width: 26px; height: 26px; }
+      /* Never show label on mobile — keep all items as icon-only */
+      .bpn-btn { padding: 9px 10px; flex: 1; justify-content: center; }
+      .bpn-btn.active { padding: 9px 14px; flex: none; }
+      .bpn-btn .bpn-label,
+      .bpn-btn.active .bpn-label { max-width: 0 !important; opacity: 0 !important; margin-left: 0 !important; overflow: hidden; }
+      .bpn-right { padding-left: 4px; margin-left: 0; gap: 0; }
+      .bpn-logout { width: 30px; height: 30px; }
+    }
+    @media (max-width: 380px) {
+      .bottom-pill-nav { left: 8px; right: 8px; bottom: 8px; padding: 4px 6px; }
+      .bpn-btn { padding: 8px 8px; }
+      .bpn-btn.active { padding: 8px 10px; }
+      .bpn-brand img { width: 22px; height: 22px; }
     }
 
     /* SIDEBAR OVERLAY */
@@ -1426,7 +1445,7 @@
 <!-- BOTTOM PILL NAV -->
 <nav class="bottom-pill-nav" id="bottomPillNav">
   <div class="bpn-brand">
-    <img src="assets/images/heyzoya.png" alt="HeyZoya">
+    <img src="assets/images/heyZoyaLogo.png" alt="HeyZoya">
     <span class="bpn-brand-name">HeyZoya</span>
   </div>
 
