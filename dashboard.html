@@ -755,9 +755,6 @@
         <button class="nav-item" data-section="appointments">
           <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Appointments
         </button>
-        <button class="nav-item" data-section="calendar">
-          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="12" cy="15" r="2"/></svg></span> Calendar
-        </button>
         <button class="nav-item" data-section="sms">
           <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span> Send SMS
         </button>
@@ -1026,15 +1023,9 @@
             <tbody id="apptBody"></tbody>
           </table>
         </div>
-      </section>
 
-      <!-- ─── CALENDAR ─── -->
-      <section id="calendar">
-        <div class="section-header">
-          <h2>Appointment Calendar</h2>
-          <p>Visual view of all your scheduled appointments</p>
-        </div>
-        <div class="card" style="padding:28px">
+        <!-- ─── CALENDAR (embedded) ─── -->
+        <div class="card" style="padding:28px;margin-top:24px">
           <div class="calendar-container">
             <div class="calendar-header">
               <div class="calendar-nav-group">
@@ -1414,10 +1405,6 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       Appts
     </button>
-    <button class="mobile-nav-btn" data-section="calendar">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="12" cy="15" r="2"/></svg>
-      Cal
-    </button>
     <button class="mobile-nav-btn" data-section="sms">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       SMS
@@ -1454,8 +1441,8 @@
   window.showToast = showToast;
 
   // ── NAVIGATION ──
-  const sections   = ['overview', 'leads', 'calls', 'appointments', 'calendar', 'sms', 'transfer', 'account'];
-  const pageTitles = { overview: 'Overview', leads: 'Leads', calls: 'Calls', appointments: 'Appointments', calendar: 'Appointment Calendar', sms: 'Send SMS', transfer: 'Transfer Calls', account: 'Account Settings' };
+  const sections   = ['overview', 'leads', 'calls', 'appointments', 'sms', 'transfer', 'account'];
+  const pageTitles = { overview: 'Overview', leads: 'Leads', calls: 'Calls', appointments: 'Appointments', sms: 'Send SMS', transfer: 'Transfer Calls', account: 'Account Settings' };
 
   function switchSection(sec) {
     document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.section === sec));
